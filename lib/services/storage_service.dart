@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -14,6 +13,15 @@ class FirebaseStorageService {
     Uint8List? imageBytes,
   }) async {
     try {
+      // Validate file size (Max 5MB to prevent quota exhaustion)
+      const maxSizeBytes = 5 * 1024 * 1024;
+      if (imageFile != null && imageFile.lengthSync() > maxSizeBytes) {
+        throw Exception('Image file exceeds the 5MB upload limit.');
+      }
+      if (imageBytes != null && imageBytes.lengthInBytes > maxSizeBytes) {
+        throw Exception('Image exceeds the 5MB upload limit.');
+      }
+
       final Reference ref =
           _storage.ref().child('user_profiles').child('$userId.jpg');
 

@@ -28,7 +28,17 @@ class _AuthScreenState extends State<AuthScreen> {
     super.dispose();
   }
 
-  void _navigateToHome() {
+  void _navigateToHome([String? message]) {
+    if (message != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.primaryGreen,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -44,34 +54,62 @@ class _AuthScreenState extends State<AuthScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Top Header Banner
+              // Top Header Banner with Gradient
               Container(
-                color: AppColors.primaryYellow,
-                padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
+                decoration: const BoxDecoration(
+                  gradient: AppColors.yellowGradient,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: const BoxDecoration(
-                        color: Colors.black,
-                        shape: BoxShape.circle,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      child: const Icon(
-                        Icons.bolt_rounded,
-                        size: 40,
-                        color: AppColors.primaryYellow,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.asset(
+                          'assets/images/app_logo.png',
+                          width: 72,
+                          height: 72,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: const BoxDecoration(
+                              color: Colors.black,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.bolt_rounded,
+                              size: 40,
+                              color: AppColors.primaryYellow,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     RichText(
                       text: const TextSpan(
                         style: TextStyle(
-                          fontSize: 32,
+                          fontSize: 34,
                           fontWeight: FontWeight.w900,
-                          fontFamily: 'sans-serif',
+                          letterSpacing: -0.5,
                         ),
                         children: [
                           TextSpan(
@@ -86,12 +124,19 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      'India\'s Last Minute App ⚡ Everything in 10 mins',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'India\'s Last Minute App ⚡ Everything in 10 mins',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ],
@@ -109,17 +154,19 @@ class _AuthScreenState extends State<AuthScreen> {
                         margin: const EdgeInsets.only(bottom: 16),
                         decoration: BoxDecoration(
                           color: Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.red.shade200),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.error_outline, color: Colors.red),
+                            const Icon(Icons.error_outline_rounded,
+                                color: Colors.red, size: 20),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 authProvider.errorMessage!,
-                                style: const TextStyle(color: Colors.red, fontSize: 13),
+                                style: const TextStyle(
+                                    color: Colors.red, fontSize: 13),
                               ),
                             ),
                           ],
@@ -131,9 +178,12 @@ class _AuthScreenState extends State<AuthScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: AppColors.textPrimary,
-                        elevation: 2,
-                        side: const BorderSide(color: AppColors.border),
+                        elevation: 0,
+                        side: const BorderSide(color: AppColors.border, width: 1.5),
                         padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                       onPressed: authProvider.isLoading
                           ? null
@@ -141,28 +191,23 @@ class _AuthScreenState extends State<AuthScreen> {
                               final success = await authProvider
                                   .signInWithGoogle(profileProvider);
                               if (success && mounted) {
-                                _navigateToHome();
+                                _navigateToHome('⚡ Signed in via Firebase Google OAuth!');
                               }
                             },
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Image.network(
-                            'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
-                            height: 22,
-                            width: 22,
-                            errorBuilder: (_, __, ___) => const Icon(
-                              Icons.g_mobiledata,
-                              color: Colors.blue,
-                              size: 28,
-                            ),
+                          Icon(
+                            Icons.g_mobiledata_rounded,
+                            color: Colors.blue,
+                            size: 30,
                           ),
-                          const SizedBox(width: 12),
-                          const Text(
+                          SizedBox(width: 8),
+                          Text(
                             'Continue with Google',
                             style: TextStyle(
                               fontSize: 15,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                         ],
@@ -176,11 +221,12 @@ class _AuthScreenState extends State<AuthScreen> {
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
-                            'OR',
+                            'OR WITH EMAIL',
                             style: TextStyle(
                               color: AppColors.textMuted,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 11,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ),
@@ -200,7 +246,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               controller: _nameController,
                               decoration: const InputDecoration(
                                 labelText: 'Full Name',
-                                prefixIcon: Icon(Icons.person_outline),
+                                prefixIcon: Icon(Icons.person_outline_rounded),
                               ),
                               validator: (val) {
                                 if (!_isLogin && (val == null || val.isEmpty)) {
@@ -209,7 +255,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 14),
                           ],
 
                           TextFormField(
@@ -226,14 +272,14 @@ class _AuthScreenState extends State<AuthScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
 
                           TextFormField(
                             controller: _passwordController,
                             obscureText: true,
                             decoration: const InputDecoration(
                               labelText: 'Password',
-                              prefixIcon: Icon(Icons.lock_outline),
+                              prefixIcon: Icon(Icons.lock_outline_rounded),
                             ),
                             validator: (val) {
                               if (val == null || val.length < 6) {
@@ -242,12 +288,15 @@ class _AuthScreenState extends State<AuthScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 22),
 
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryGreen,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
                             ),
                             onPressed: authProvider.isLoading
                                 ? null
@@ -269,7 +318,9 @@ class _AuthScreenState extends State<AuthScreen> {
                                         );
                                       }
                                       if (success && mounted) {
-                                        _navigateToHome();
+                                        _navigateToHome(_isLogin
+                                            ? '⚡ Welcome back, ${profileProvider.userProfile?.name ?? "Shopper"}!'
+                                            : '🎉 Account created & synced with Firebase!');
                                       }
                                     }
                                   },
@@ -283,10 +334,10 @@ class _AuthScreenState extends State<AuthScreen> {
                                     ),
                                   )
                                 : Text(
-                                    _isLogin ? 'Login with Email' : 'Create Account',
+                                    _isLogin ? 'Login to atBlink' : 'Create Free Account',
                                     style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
                           ),
@@ -294,7 +345,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     TextButton(
                       onPressed: () {
                         setState(() {
@@ -304,26 +355,41 @@ class _AuthScreenState extends State<AuthScreen> {
                       child: Text(
                         _isLogin
                             ? 'Don\'t have an account? Sign Up'
-                            : 'Already have an account? Log In',
+                            : 'Already registered? Log In',
                         style: const TextStyle(
                           color: AppColors.primaryGreen,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
                       onPressed: authProvider.isLoading
                           ? null
                           : () async {
                               final success =
                                   await authProvider.signInAsGuest(profileProvider);
                               if (success && mounted) {
-                                _navigateToHome();
+                                _navigateToHome('⚡ Signed in as Guest (Anonymous Firebase Auth)');
                               }
                             },
-                      child: const Text('Explore as Guest'),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.bolt_rounded,
+                              size: 18, color: AppColors.primaryGreen),
+                          SizedBox(width: 6),
+                          Text('Instant Guest Checkout'),
+                        ],
+                      ),
                     ),
                   ],
                 ),

@@ -2,11 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../models/order_model.dart';
 import '../utils/constants.dart';
 import 'home_screen.dart';
+import 'orders_screen.dart';
 
 class OrderSuccessScreen extends StatefulWidget {
-  const OrderSuccessScreen({super.key});
+  final OrderModel? order;
+
+  const OrderSuccessScreen({super.key, this.order});
 
   @override
   State<OrderSuccessScreen> createState() => _OrderSuccessScreenState();
@@ -48,6 +52,11 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final order = widget.order;
+    final orderId = order?.orderId ?? 'ATB-998241';
+    final deliveryAddress = order?.deliveryAddress ??
+        'Flat 402, Green Park Heights, Cyber City';
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -109,14 +118,15 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
               ),
               const SizedBox(height: 4),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text(
-                  'ORDER ID: #ATB-998241',
-                  style: TextStyle(
+                child: Text(
+                  'ORDER ID: #$orderId',
+                  style: const TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -130,7 +140,8 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
               // Countdown Delivery Timer Card
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFFFFFBEA), Color(0xFFFFF3CD)],
@@ -186,9 +197,11 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
                         letterSpacing: 1.5,
                       ),
                     ),
-                    const Text(
-                      'Minutes : Seconds',
-                      style: TextStyle(
+                    Text(
+                      'Delivering to: $deliveryAddress',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w600,
@@ -264,7 +277,77 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              // Items Summary (if available)
+              if (order != null && order.items.isNotEmpty) ...[
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Order Items (${order.items.length})',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            'Paid: ₹${order.grandTotal.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.primaryGreen,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 16),
+                      ...order.items.map(
+                        (item) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${item.quantity}x ${item.product.title}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                '₹${item.totalPrice.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 20),
 
               // Phased Delivery Stepper
               Container(
@@ -284,7 +367,8 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
                     ),
                     _buildStepRow(
                       title: 'Items Picked & Packed',
-                      subtitle: 'Fresh dairy and grocery checked by store manager',
+                      subtitle:
+                          'Fresh dairy and grocery checked by store manager',
                       isCompleted: true,
                       isLast: false,
                     ),
@@ -305,6 +389,30 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
               ),
 
               const SizedBox(height: 28),
+
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  foregroundColor: AppColors.primaryGreen,
+                  side: const BorderSide(color: AppColors.primaryGreen, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const OrdersScreen()),
+                  );
+                },
+                icon: const Icon(Icons.receipt_long_rounded, size: 20),
+                label: const Text(
+                  'View in My Orders (Firebase)',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                ),
+              ),
+
+              const SizedBox(height: 12),
 
               ElevatedButton(
                 style: ElevatedButton.styleFrom(

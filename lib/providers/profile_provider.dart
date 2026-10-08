@@ -1,15 +1,16 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/user_profile_model.dart';
+import '../services/firestore_service.dart';
 import '../services/storage_service.dart';
 import '../utils/constants.dart';
 
 class ProfileProvider extends ChangeNotifier {
   final FirebaseStorageService _storageService = FirebaseStorageService();
+  final FirestoreService _firestoreService = FirestoreService();
   UserProfile? _userProfile;
   bool _isLoading = false;
   String? _errorMessage;
@@ -26,6 +27,8 @@ class ProfileProvider extends ChangeNotifier {
   Future<void> setProfile(UserProfile profile) async {
     _userProfile = profile;
     await _saveProfileToStorage();
+    // Sync login metadata to Firestore
+    _firestoreService.saveUserLoginInfo(profile);
     notifyListeners();
   }
 
@@ -85,6 +88,7 @@ class ProfileProvider extends ChangeNotifier {
       );
 
       await _saveProfileToStorage();
+      _firestoreService.saveUserLoginInfo(_userProfile!);
       _isLoading = false;
       notifyListeners();
       return true;
@@ -94,6 +98,23 @@ class ProfileProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  // Quick Switch Delivery Address
+  Future<void> updateDeliveryAddress(String newAddress) async {
+    if (_userProfile == null) {
+      _userProfile = UserProfile(
+        id: 'guest',
+        name: 'Guest User',
+        email: 'user@atblink.com',
+        address: newAddress,
+      );
+    } else {
+      _userProfile = _userProfile!.copyWith(address: newAddress);
+    }
+    await _saveProfileToStorage();
+    _firestoreService.saveUserLoginInfo(_userProfile!);
+    notifyListeners();
   }
 
   // DELETE Profile / Reset Account Data

@@ -2,7 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:atblink/models/cart_item_model.dart';
+import 'package:atblink/models/order_model.dart';
 import 'package:atblink/models/product_model.dart';
+import 'package:atblink/models/review_model.dart';
 import 'package:atblink/models/user_profile_model.dart';
 import 'package:atblink/providers/cart_provider.dart';
 import 'package:atblink/providers/product_provider.dart';
@@ -213,6 +215,23 @@ void main() {
         expect(deal.discountPercentage, greaterThanOrEqualTo(10.0));
       }
     });
+
+    test('selectCategory filters instantly and resetCategory resets to All', () async {
+      await productProvider.loadProducts();
+
+      // Test select category
+      productProvider.selectCategory('Snacks');
+      expect(productProvider.selectedCategory, equals('Snacks'));
+      expect(productProvider.products, isNotEmpty);
+      for (final p in productProvider.products) {
+        expect(p.category.toLowerCase(), equals('snacks'));
+      }
+
+      // Test reset category
+      productProvider.resetCategory();
+      expect(productProvider.selectedCategory, equals('All'));
+      expect(productProvider.products.length, greaterThan(productProvider.products.where((p) => p.category == 'Snacks').length));
+    });
   });
 
   group('RestApiService Fallback Resiliency Tests', () {
@@ -230,6 +249,89 @@ void main() {
       for (final p in vegProducts) {
         expect(p.category.toLowerCase(), equals('vegetables'));
       }
+    });
+
+    test('Every quick-commerce category has authentic non-empty products without merging', () async {
+      final service = RestApiService();
+      final categoriesToCheck = ['Dairy', 'Vegetables', 'Snacks', 'Drinks', 'Fruits', 'Bakery', 'Personal Care'];
+
+      for (final cat in categoriesToCheck) {
+        final products = await service.fetchProducts(category: cat);
+        expect(products, isNotEmpty, reason: 'Category $cat should not be empty');
+        for (final p in products) {
+          expect(p.category.toLowerCase(), equals(cat.toLowerCase()), reason: 'Product $p should belong strictly to $cat');
+        }
+      }
+    });
+  });
+
+  group('ReviewModel & Rating Tests', () {
+    test('ReviewModel serialization and deserialization', () {
+      final review = ReviewModel(
+        id: 'rev_123',
+        productId: 101,
+        userId: 'user_456',
+        userName: 'Aarav Sharma',
+        rating: 4.5,
+        comment: 'Fresh quality milk, delivered in 7 mins!',
+      );
+
+      final map = review.toMap();
+      expect(map['id'], equals('rev_123'));
+      expect(map['productId'], equals(101));
+      expect(map['rating'], equals(4.5));
+      expect(map['comment'], equals('Fresh quality milk, delivered in 7 mins!'));
+
+      final fromMap = ReviewModel.fromMap(map);
+      expect(fromMap.id, equals('rev_123'));
+      expect(fromMap.productId, equals(101));
+      expect(fromMap.userName, equals('Aarav Sharma'));
+      expect(fromMap.rating, equals(4.5));
+    });
+  });
+
+  group('OrderModel & OrderProvider Tests', () {
+    test('OrderModel serialization and order ID generation', () {
+      final product = Product(
+        id: 1,
+        title: 'Banana Bunch',
+        description: 'Fresh bananas',
+        price: 50.0,
+        discountPercentage: 0.0,
+        rating: 4.8,
+        stock: 20,
+        brand: 'FreshFarm',
+        category: 'Fruits',
+        thumbnail: '',
+      );
+
+      final cartItem = CartItem(product: product, quantity: 2);
+      final orderId = OrderModel.generateOrderId();
+
+      final order = OrderModel(
+        orderId: orderId,
+        userId: 'user_test_99',
+        items: [cartItem],
+        subtotal: 100.0,
+        deliveryFee: 0.0,
+        handlingFee: 2.0,
+        grandTotal: 102.0,
+        deliveryAddress: 'Flat 101, Palm Grove, Bengaluru',
+      );
+
+      expect(order.orderId.startsWith('ATB-'), isTrue);
+      expect(order.items.length, equals(1));
+      expect(order.grandTotal, equals(102.0));
+
+      final map = order.toMap();
+      expect(map['userId'], equals('user_test_99'));
+      expect(map['itemCount'], equals(2));
+      expect(map['grandTotal'], equals(102.0));
+
+      final fromMap = OrderModel.fromMap(map);
+      expect(fromMap.orderId, equals(orderId));
+      expect(fromMap.userId, equals('user_test_99'));
+      expect(fromMap.items.first.product.title, equals('Banana Bunch'));
     });
   });
 }

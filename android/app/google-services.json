@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1062841587937",
+    "project_id": "atblink-meet",
+    "storage_bucket": "atblink-meet.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1062841587937:android:9d9d9ce13acc889f333fa0",
+        "android_client_info": {
+          "package_name": "com.atblink.atblink"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwsULySiJWZiiv6vordQ8vZkSgWTTW0Rs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/cart_provider.dart';
+import '../providers/order_provider.dart';
 import '../providers/profile_provider.dart';
 import '../utils/constants.dart';
 import 'order_success_screen.dart';
@@ -317,11 +319,11 @@ class _CartScreenState extends State<CartScreen> {
                                           children: [
                                             Text(
                                               product.title,
-                                              maxLines: 1,
+                                              maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
-                                                fontWeight: FontWeight.w800,
-                                                fontSize: 13,
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 13.5,
                                                 color: AppColors.textPrimary,
                                               ),
                                             ),
@@ -329,7 +331,7 @@ class _CartScreenState extends State<CartScreen> {
                                             Text(
                                               '${product.unitQuantity} • ₹${product.discountedPrice.toStringAsFixed(2)}',
                                               style: const TextStyle(
-                                                fontSize: 12,
+                                                fontSize: 12.5,
                                                 color: AppColors.textMuted,
                                                 fontWeight: FontWeight.w600,
                                               ),
@@ -350,6 +352,7 @@ class _CartScreenState extends State<CartScreen> {
                                           children: [
                                             GestureDetector(
                                               onTap: () {
+                                                HapticFeedback.lightImpact();
                                                 cartProvider.removeFromCart(
                                                     product.id);
                                               },
@@ -365,12 +368,13 @@ class _CartScreenState extends State<CartScreen> {
                                               '${cartItem.quantity}',
                                               style: const TextStyle(
                                                 color: Colors.white,
-                                                fontWeight: FontWeight.w900,
+                                                fontWeight: FontWeight.w800,
                                                 fontSize: 13,
                                               ),
                                             ),
                                             GestureDetector(
                                               onTap: () {
+                                                HapticFeedback.lightImpact();
                                                 cartProvider.addToCart(product);
                                               },
                                               child: const Padding(
@@ -594,11 +598,21 @@ class _CartScreenState extends State<CartScreen> {
                         ),
                       ),
                       onPressed: () {
+                        final deliveryAddress = userProfile?.address ??
+                            'Flat 402, Green Park Heights, Cyber City';
+                        final userId = userProfile?.id ?? 'guest';
+                        final orderSnapshot =
+                            cartProvider.createOrderSnapshot(deliveryAddress, userId);
+
+                        // Persist to Firebase Firestore & local state
+                        context.read<OrderProvider>().placeOrder(orderSnapshot);
+
                         cartProvider.clearCart();
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const OrderSuccessScreen(),
+                            builder: (_) =>
+                                OrderSuccessScreen(order: orderSnapshot),
                           ),
                         );
                       },

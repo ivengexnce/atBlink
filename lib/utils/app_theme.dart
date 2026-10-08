@@ -5,11 +5,11 @@ import 'constants.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
-    final baseTextTheme = GoogleFonts.plusJakartaSansTextTheme();
+    final String? fontFamily = GoogleFonts.plusJakartaSans().fontFamily;
 
     return ThemeData(
       useMaterial3: true,
-      textTheme: baseTextTheme,
+      fontFamily: fontFamily,
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primaryYellow,
         primary: AppColors.primaryYellow,
@@ -17,13 +17,68 @@ class AppTheme {
         surface: AppColors.background,
       ),
       scaffoldBackgroundColor: AppColors.background,
+      textTheme: TextTheme(
+        headlineMedium: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          color: AppColors.textPrimary,
+        ),
+        titleLarge: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 17,
+          fontWeight: FontWeight.w800,
+          color: AppColors.textPrimary,
+        ),
+        titleMedium: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+        ),
+        titleSmall: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 12.5,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+        bodyLarge: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 13.5,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimary,
+        ),
+        bodyMedium: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 12.5,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textSecondary,
+        ),
+        bodySmall: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textMuted,
+        ),
+        labelLarge: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+        ),
+        labelMedium: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.primaryYellow,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
-        titleTextStyle: GoogleFonts.plusJakartaSans(
+        titleTextStyle: TextStyle(
+          fontFamily: fontFamily,
           color: AppColors.textPrimary,
           fontSize: 18,
           fontWeight: FontWeight.w800,
@@ -42,7 +97,8 @@ class AppTheme {
           backgroundColor: AppColors.primaryGreen,
           foregroundColor: Colors.white,
           elevation: 0,
-          textStyle: GoogleFonts.plusJakartaSans(
+          textStyle: TextStyle(
+            fontFamily: fontFamily,
             fontSize: 15,
             fontWeight: FontWeight.w700,
           ),
@@ -56,7 +112,8 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primaryGreen,
           side: const BorderSide(color: AppColors.primaryGreen, width: 1.5),
-          textStyle: GoogleFonts.plusJakartaSans(
+          textStyle: TextStyle(
+            fontFamily: fontFamily,
             fontSize: 14,
             fontWeight: FontWeight.w700,
           ),

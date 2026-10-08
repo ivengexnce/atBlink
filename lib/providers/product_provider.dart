@@ -102,8 +102,18 @@ class ProductProvider extends ChangeNotifier {
   }
 
   void selectCategory(String category) {
+    if (_selectedCategory == category) return;
     _selectedCategory = category;
-    loadProducts(category: category);
+    if (_products.isNotEmpty) {
+      _applyFilters();
+      notifyListeners();
+    } else {
+      loadProducts(category: category);
+    }
+  }
+
+  void resetCategory() {
+    selectCategory('All');
   }
 
   void setSearchQuery(String query) {
@@ -115,7 +125,7 @@ class ProductProvider extends ChangeNotifier {
   void _applyFilters() {
     _filteredProducts = _products.where((product) {
       bool matchesCategory = (_selectedCategory == 'All') ||
-          (product.category.toLowerCase() == _selectedCategory.toLowerCase());
+          (product.category.trim().toLowerCase() == _selectedCategory.trim().toLowerCase());
       bool matchesQuery = _searchQuery.isEmpty ||
           product.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           product.category.toLowerCase().contains(_searchQuery.toLowerCase()) ||

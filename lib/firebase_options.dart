@@ -20,28 +20,28 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDemoKeyAtBlinkProjectForWeb1234567',
-    appId: '1:100200300400:web:atblinkdemo123456789',
-    messagingSenderId: '100200300400',
-    projectId: 'atblink-app-store',
-    authDomain: 'atblink-app-store.firebaseapp.com',
-    storageBucket: 'atblink-app-store.appspot.com',
+    apiKey: 'AIzaSyDwsULySiJWZiiv6vordQ8vZkSgWTTW0Rs',
+    appId: '1:1062841587937:web:9d9d9ce13acc889f333fa0',
+    messagingSenderId: '1062841587937',
+    projectId: 'atblink-meet',
+    authDomain: 'atblink-meet.firebaseapp.com',
+    storageBucket: 'atblink-meet.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDemoKeyAtBlinkProjectAndroid12345',
-    appId: '1:100200300400:android:atblinkdemo1234567',
-    messagingSenderId: '100200300400',
-    projectId: 'atblink-app-store',
-    storageBucket: 'atblink-app-store.appspot.com',
+    apiKey: 'AIzaSyDwsULySiJWZiiv6vordQ8vZkSgWTTW0Rs',
+    appId: '1:1062841587937:android:9d9d9ce13acc889f333fa0',
+    messagingSenderId: '1062841587937',
+    projectId: 'atblink-meet',
+    storageBucket: 'atblink-meet.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDemoKeyAtBlinkProjectIOS1234567',
-    appId: '1:100200300400:ios:atblinkdemo123456789',
-    messagingSenderId: '100200300400',
-    projectId: 'atblink-app-store',
-    storageBucket: 'atblink-app-store.appspot.com',
+    apiKey: 'AIzaSyDwsULySiJWZiiv6vordQ8vZkSgWTTW0Rs',
+    appId: '1:1062841587937:ios:9d9d9ce13acc889f333fa0',
+    messagingSenderId: '1062841587937',
+    projectId: 'atblink-meet',
+    storageBucket: 'atblink-meet.firebasestorage.app',
     iosBundleId: 'com.atblink.atblink',
   );
 }

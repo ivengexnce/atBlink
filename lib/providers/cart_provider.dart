@@ -1,14 +1,17 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/cart_item_model.dart';
+import '../models/order_model.dart';
 import '../models/product_model.dart';
 import '../utils/constants.dart';
 
 class CartProvider extends ChangeNotifier {
   final Map<int, CartItem> _items = {};
+  Timer? _saveDebounceTimer;
 
   Map<int, CartItem> get items => _items;
 
@@ -29,6 +32,12 @@ class CartProvider extends ChangeNotifier {
     _loadCart();
   }
 
+  @override
+  void dispose() {
+    _saveDebounceTimer?.cancel();
+    super.dispose();
+  }
+
   int getProductQuantity(int productId) {
     if (_items.containsKey(productId)) {
       return _items[productId]!.quantity;
@@ -42,7 +51,7 @@ class CartProvider extends ChangeNotifier {
     } else {
       _items[product.id] = CartItem(product: product, quantity: 1);
     }
-    _saveCart();
+    _scheduleSaveCart();
     notifyListeners();
   }
 
@@ -54,20 +63,43 @@ class CartProvider extends ChangeNotifier {
     } else {
       _items.remove(productId);
     }
-    _saveCart();
+    _scheduleSaveCart();
     notifyListeners();
   }
 
   void removeItemCompletely(int productId) {
     _items.remove(productId);
-    _saveCart();
+    _scheduleSaveCart();
     notifyListeners();
   }
 
   void clearCart() {
+    _saveDebounceTimer?.cancel();
     _items.clear();
     _saveCart();
     notifyListeners();
+  }
+
+  /// Creates an immutable order receipt snapshot before clearing the cart
+  OrderModel createOrderSnapshot(String deliveryAddress, [String userId = 'guest']) {
+    return OrderModel(
+      orderId: OrderModel.generateOrderId(),
+      userId: userId,
+      items: List<CartItem>.from(cartItemList),
+      subtotal: subtotal,
+      deliveryFee: deliveryFee,
+      handlingFee: handlingFee,
+      grandTotal: grandTotal,
+      deliveryAddress: deliveryAddress,
+    );
+  }
+
+  /// Debounces rapid successive disk writes to prevent storage race conditions
+  void _scheduleSaveCart() {
+    _saveDebounceTimer?.cancel();
+    _saveDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+      _saveCart();
+    });
   }
 
   Future<void> _saveCart() async {

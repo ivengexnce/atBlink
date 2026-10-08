@@ -15,7 +15,11 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const AtBlinkApp());
 
-    // Verify that atBlink title or lightning icon exists
+    // Verify that atBlink MaterialApp is loaded
     expect(find.byType(MaterialApp), findsOneWidget);
+
+    // Fast-forward animation & splash timer
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump();
   });
 }

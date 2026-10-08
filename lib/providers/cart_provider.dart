@@ -19,9 +19,9 @@ class CartProvider extends ChangeNotifier {
   double get subtotal =>
       _items.values.fold(0.0, (sum, item) => sum + item.totalPrice);
 
-  double get deliveryFee => (subtotal > 15.0 || subtotal == 0) ? 0.0 : 0.99;
+  double get deliveryFee => (subtotal > 199.0 || subtotal == 0) ? 0.0 : 15.0;
 
-  double get handlingFee => subtotal > 0 ? 0.20 : 0.0;
+  double get handlingFee => subtotal > 0 ? 5.0 : 0.0;
 
   double get grandTotal => subtotal + deliveryFee + handlingFee;
 

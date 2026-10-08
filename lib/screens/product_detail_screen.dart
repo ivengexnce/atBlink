@@ -170,7 +170,7 @@ class ProductDetailScreen extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        '\$${product.discountedPrice.toStringAsFixed(2)}',
+                        '₹${product.discountedPrice.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 26,
                           fontWeight: FontWeight.w900,
@@ -180,7 +180,7 @@ class ProductDetailScreen extends StatelessWidget {
                       const SizedBox(width: 10),
                       if (product.discountPercentage > 0)
                         Text(
-                          '\$${product.price.toStringAsFixed(2)}',
+                          '₹${product.price.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             color: AppColors.textMuted,
@@ -242,7 +242,7 @@ class ProductDetailScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '\$${(product.discountedPrice * (qty > 0 ? qty : 1)).toStringAsFixed(2)}',
+                      '₹${(product.discountedPrice * (qty > 0 ? qty : 1)).toStringAsFixed(2)}',
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w900,

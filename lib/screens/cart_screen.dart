@@ -173,7 +173,7 @@ class CartScreen extends StatelessWidget {
                                         ),
                                       ),
                                       Text(
-                                        '${product.unitQuantity} • \$${product.discountedPrice.toStringAsFixed(2)}',
+                                        '${product.unitQuantity} • ₹${product.discountedPrice.toStringAsFixed(2)}',
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: AppColors.textMuted,
@@ -252,7 +252,7 @@ class CartScreen extends StatelessWidget {
                           children: [
                             const Text('Items Total',
                                 style: TextStyle(color: AppColors.textSecondary)),
-                            Text('\$${cartProvider.subtotal.toStringAsFixed(2)}',
+                            Text('₹${cartProvider.subtotal.toStringAsFixed(2)}',
                                 style:
                                     const TextStyle(fontWeight: FontWeight.bold)),
                           ],
@@ -266,7 +266,7 @@ class CartScreen extends StatelessWidget {
                             Text(
                               cartProvider.deliveryFee == 0
                                   ? 'FREE'
-                                  : '\$${cartProvider.deliveryFee.toStringAsFixed(2)}',
+                                  : '₹${cartProvider.deliveryFee.toStringAsFixed(2)}',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: cartProvider.deliveryFee == 0
@@ -283,7 +283,7 @@ class CartScreen extends StatelessWidget {
                             const Text('Handling Fee',
                                 style: TextStyle(color: AppColors.textSecondary)),
                             Text(
-                                '\$${cartProvider.handlingFee.toStringAsFixed(2)}',
+                                '₹${cartProvider.handlingFee.toStringAsFixed(2)}',
                                 style:
                                     const TextStyle(fontWeight: FontWeight.bold)),
                           ],
@@ -300,7 +300,7 @@ class CartScreen extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '\$${cartProvider.grandTotal.toStringAsFixed(2)}',
+                              '₹${cartProvider.grandTotal.toStringAsFixed(2)}',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w900,

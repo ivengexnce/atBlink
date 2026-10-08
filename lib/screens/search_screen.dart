@@ -133,7 +133,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                 fontWeight: FontWeight.bold, fontSize: 14),
                           ),
                           subtitle: Text(
-                            '${product.unitQuantity} • \$${product.discountedPrice.toStringAsFixed(2)}',
+                            '${product.unitQuantity} • ₹${product.discountedPrice.toStringAsFixed(2)}',
                             style: const TextStyle(
                               color: AppColors.primaryGreen,
                               fontWeight: FontWeight.bold,

@@ -427,7 +427,7 @@ class HomeScreen extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                '\$${cartProvider.grandTotal.toStringAsFixed(2)}',
+                                '₹${cartProvider.grandTotal.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -671,7 +671,7 @@ class HomeScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '\$${product.discountedPrice.toStringAsFixed(2)}',
+                            '₹${product.discountedPrice.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w900,
@@ -680,7 +680,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                           if (product.discountPercentage > 0)
                             Text(
-                              '\$${product.price.toStringAsFixed(2)}',
+                              '₹${product.price.toStringAsFixed(2)}',
                               style: const TextStyle(
                                 fontSize: 11,
                                 color: AppColors.textMuted,

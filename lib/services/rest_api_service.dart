@@ -27,7 +27,27 @@ class RestApiService {
         final Map<String, dynamic> data = json.decode(response.body);
         if (data.containsKey('products')) {
           final List<dynamic> productsJson = data['products'];
-          List<Product> products = productsJson.map((j) => Product.fromJson(j)).toList();
+          List<Product> products = productsJson.map((j) {
+            Product p = Product.fromJson(j);
+            // Convert USD price from REST API to INR Rupees if < 100
+            if (p.price < 100) {
+              p = Product(
+                id: p.id,
+                title: p.title,
+                description: p.description,
+                price: (p.price * 80).roundToDouble(),
+                discountPercentage: p.discountPercentage,
+                rating: p.rating,
+                stock: p.stock,
+                brand: p.brand,
+                category: p.category,
+                thumbnail: p.thumbnail,
+                unitQuantity: p.unitQuantity,
+                deliveryEta: p.deliveryEta,
+              );
+            }
+            return p;
+          }).toList();
           
           if (products.isNotEmpty) {
             return products;
@@ -40,18 +60,18 @@ class RestApiService {
       }
     }
 
-    // Fallback Quick Commerce catalog
+    // Fallback Quick Commerce catalog in Rupees (₹)
     return _getMockQuickCommerceProducts(category: category, searchQuery: searchQuery);
   }
 
-  /// Mock quick commerce catalog tailored for atBlink (Blinkit style)
+  /// Mock quick commerce catalog in Indian Rupees (₹)
   List<Product> _getMockQuickCommerceProducts({String? category, String? searchQuery}) {
     final allProducts = [
       Product(
         id: 101,
         title: 'Amul Taaza Toned Fresh Milk',
         description: 'Pasteurised Toned Milk. Essential daily fresh dairy.',
-        price: 1.20,
+        price: 33.0,
         discountPercentage: 5,
         rating: 4.8,
         stock: 100,
@@ -65,7 +85,7 @@ class RestApiService {
         id: 102,
         title: 'Fresh Farm Hydroponic Tomatoes',
         description: 'Organically grown firm red ripe tomatoes, fresh from farm.',
-        price: 2.50,
+        price: 45.0,
         discountPercentage: 20,
         rating: 4.6,
         stock: 60,
@@ -79,7 +99,7 @@ class RestApiService {
         id: 103,
         title: 'Lay\'s India\'s Magic Masala Chips',
         description: 'Crispy potato chips spiced with authentic Indian spices.',
-        price: 0.99,
+        price: 20.0,
         discountPercentage: 10,
         rating: 4.9,
         stock: 120,
@@ -93,7 +113,7 @@ class RestApiService {
         id: 104,
         title: 'Coca-Cola Zero Sugar Can',
         description: 'Refreshing ice cold carbonated soft drink zero sugar.',
-        price: 1.50,
+        price: 40.0,
         discountPercentage: 15,
         rating: 4.7,
         stock: 80,
@@ -107,7 +127,7 @@ class RestApiService {
         id: 105,
         title: 'Fresh Washington Red Apples',
         description: 'Sweet, crisp and juicy red delicious apples.',
-        price: 3.99,
+        price: 149.0,
         discountPercentage: 12,
         rating: 4.7,
         stock: 40,
@@ -121,7 +141,7 @@ class RestApiService {
         id: 106,
         title: 'Britannia Whole Wheat Sandwich Bread',
         description: 'Soft 100% whole wheat bread loaf packed with fiber.',
-        price: 1.80,
+        price: 50.0,
         discountPercentage: 8,
         rating: 4.5,
         stock: 50,
@@ -135,7 +155,7 @@ class RestApiService {
         id: 107,
         title: 'Maggi 2-Minute Masala Noodles',
         description: 'Classic favorite instant noodles with signature spice mix.',
-        price: 2.10,
+        price: 60.0,
         discountPercentage: 10,
         rating: 4.9,
         stock: 200,
@@ -149,7 +169,7 @@ class RestApiService {
         id: 108,
         title: 'Nivea Deep Impact Shower Gel',
         description: 'Refreshing body wash with microfine clay for deep cleansing.',
-        price: 4.50,
+        price: 199.0,
         discountPercentage: 25,
         rating: 4.6,
         stock: 35,

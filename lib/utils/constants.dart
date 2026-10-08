@@ -23,6 +23,7 @@ class AppColors {
 class AppConstants {
   static const String appName = 'atBlink';
   static const String appTagline = 'Everything delivered in 10 minutes';
+  static const String currencySymbol = '₹';
   
   // REST API Endpoints
   static const String restApiBaseUrl = 'https://dummyjson.com';

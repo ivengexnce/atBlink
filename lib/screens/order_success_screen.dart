@@ -50,119 +50,269 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+              (route) => false,
+            );
+          },
+        ),
+        title: const Text(
+          'Live Delivery Tracking',
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Success Header
               Container(
-                padding: const EdgeInsets.all(20),
-                decoration: const BoxDecoration(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
                   color: AppColors.lightGreen,
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primaryGreen.withValues(alpha: 0.2),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: const Icon(
                   Icons.check_circle_rounded,
                   color: AppColors.primaryGreen,
-                  size: 80,
+                  size: 56,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
               const Text(
                 'Order Placed Successfully!',
                 style: TextStyle(
                   fontSize: 22,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w900,
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Order #ATB-882319',
-                style: TextStyle(
-                  color: AppColors.textMuted,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'ORDER ID: #ATB-998241',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 24),
 
-              // Countdown Delivery Timer
+              // Countdown Delivery Timer Card
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryYellow.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(16),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFFFBEA), Color(0xFFFFF3CD)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: AppColors.primaryYellow, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primaryYellow.withValues(alpha: 0.2),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.timer_outlined, color: Colors.black87),
-                        SizedBox(width: 8),
-                        Text(
-                          'ARRIVING IN',
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: Colors.black,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.bolt_rounded,
+                            color: AppColors.primaryYellow,
+                            size: 16,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'ARRIVING AT YOUR DOOR IN',
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.1,
+                            color: Colors.black87,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Text(
                       _formatTime(_secondsLeft),
                       style: const TextStyle(
                         fontSize: 48,
                         fontWeight: FontWeight.w900,
                         color: AppColors.primaryGreen,
+                        letterSpacing: 1.5,
                       ),
                     ),
                     const Text(
                       'Minutes : Seconds',
-                      style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
 
-              // Delivery Timeline
-              Column(
-                children: [
-                  _buildStatusRow(
-                    title: 'Order Confirmed',
-                    subtitle: 'Store received your order',
-                    isDone: true,
-                  ),
-                  _buildStatusRow(
-                    title: 'Packing Items',
-                    subtitle: 'Ramesh is picking your items',
-                    isDone: true,
-                  ),
-                  _buildStatusRow(
-                    title: 'Delivery Partner Assigned',
-                    subtitle: 'Vikram assigned (0.8 km away)',
-                    isDone: true,
-                  ),
-                  _buildStatusRow(
-                    title: 'Out for Express Delivery',
-                    subtitle: 'On the way to your door',
-                    isDone: false,
-                  ),
-                ],
+              // Rider Assignment Card
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 24,
+                      backgroundColor: AppColors.primaryYellow,
+                      child: Icon(Icons.two_wheeler_rounded,
+                          color: Colors.black, size: 28),
+                    ),
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Vikram Singh',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Delivery Partner • 0.8 km away',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: AppColors.lightGreen,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.phone_rounded,
+                        color: AppColors.primaryGreen,
+                        size: 20,
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
-              const Spacer(),
+              const SizedBox(height: 24),
+
+              // Phased Delivery Stepper
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  children: [
+                    _buildStepRow(
+                      title: 'Order Confirmed',
+                      subtitle: 'Store received your order & generated invoice',
+                      isCompleted: true,
+                      isLast: false,
+                    ),
+                    _buildStepRow(
+                      title: 'Items Picked & Packed',
+                      subtitle: 'Fresh dairy and grocery checked by store manager',
+                      isCompleted: true,
+                      isLast: false,
+                    ),
+                    _buildStepRow(
+                      title: 'Rider Assigned',
+                      subtitle: 'Vikram picked up items from local dark store',
+                      isCompleted: true,
+                      isLast: false,
+                    ),
+                    _buildStepRow(
+                      title: 'Out for Express Delivery',
+                      subtitle: 'On the way to your door (ETA 8 mins)',
+                      isCompleted: false,
+                      isLast: true,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 28),
 
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
+                  minimumSize: const Size(double.infinity, 50),
+                  backgroundColor: AppColors.primaryGreen,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
@@ -171,8 +321,12 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
                     (route) => false,
                   );
                 },
-                child: const Text('Back to Home'),
+                child: const Text(
+                  'Back to Home Store',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                ),
               ),
+              const SizedBox(height: 12),
             ],
           ),
         ),
@@ -180,40 +334,70 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
     );
   }
 
-  Widget _buildStatusRow({
+  Widget _buildStepRow({
     required String title,
     required String subtitle,
-    required bool isDone,
+    required bool isCompleted,
+    required bool isLast,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Icon(
-            isDone ? Icons.check_circle : Icons.radio_button_unchecked,
-            color: isDone ? AppColors.primaryGreen : AppColors.textMuted,
-            size: 20,
-          ),
-          const SizedBox(width: 12),
-          Column(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isCompleted
+                    ? AppColors.primaryGreen
+                    : Colors.grey.shade300,
+              ),
+              child: Icon(
+                isCompleted ? Icons.check : Icons.circle,
+                size: 14,
+                color: Colors.white,
+              ),
+            ),
+            if (!isLast)
+              Container(
+                width: 2,
+                height: 38,
+                color: isCompleted
+                    ? AppColors.primaryGreen
+                    : Colors.grey.shade300,
+              ),
+          ],
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
                   fontSize: 14,
-                  color: isDone ? AppColors.textPrimary : AppColors.textMuted,
+                  color: isCompleted
+                      ? AppColors.textPrimary
+                      : AppColors.textMuted,
                 ),
               ),
+              const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
+              if (!isLast) const SizedBox(height: 16),
             ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

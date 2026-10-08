@@ -28,12 +28,19 @@ class HomeScreen extends StatelessWidget {
         child: Stack(
           children: [
             CustomScrollView(
+              physics: const BouncingScrollPhysics(),
               slivers: [
-                // Top Header Sliver
+                // Top Header Sliver with Gradient
                 SliverToBoxAdapter(
                   child: Container(
-                    color: AppColors.primaryYellow,
-                    padding: const EdgeInsets.all(16.0),
+                    decoration: const BoxDecoration(
+                      gradient: AppColors.yellowGradient,
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(24),
+                        bottomRight: Radius.circular(24),
+                      ),
+                    ),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -50,27 +57,35 @@ class HomeScreen extends StatelessWidget {
                                       Container(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 8,
-                                          vertical: 3,
+                                          vertical: 4,
                                         ),
                                         decoration: BoxDecoration(
                                           color: Colors.black,
-                                          borderRadius: BorderRadius.circular(6),
+                                          borderRadius: BorderRadius.circular(8),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.15),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
                                         ),
                                         child: const Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Icon(
-                                              Icons.bolt,
+                                              Icons.bolt_rounded,
                                               color: AppColors.primaryYellow,
-                                              size: 14,
+                                              size: 15,
                                             ),
-                                            SizedBox(width: 2),
+                                            SizedBox(width: 3),
                                             Text(
                                               '10 MINS',
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w900,
+                                                letterSpacing: 0.5,
                                               ),
                                             ),
                                           ],
@@ -81,22 +96,40 @@ class HomeScreen extends StatelessWidget {
                                         'DELIVERY TO',
                                         style: TextStyle(
                                           fontSize: 11,
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w800,
                                           color: Colors.black87,
+                                          letterSpacing: 0.8,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    userProfile?.address ?? 'Select Delivery Address',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
+                                  const SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on_rounded,
+                                        color: AppColors.primaryGreen,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          userProfile?.address ?? 'Select Delivery Address',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        color: Colors.black54,
+                                        size: 20,
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -112,21 +145,35 @@ class HomeScreen extends StatelessWidget {
                                   ),
                                 );
                               },
-                              child: CircleAvatar(
-                                radius: 22,
-                                backgroundColor: Colors.white,
-                                backgroundImage: (userProfile?.photoUrl != null &&
-                                        userProfile!.photoUrl.isNotEmpty)
-                                    ? NetworkImage(userProfile.photoUrl)
-                                    : null,
-                                child: (userProfile?.photoUrl == null ||
-                                        userProfile!.photoUrl.isEmpty)
-                                    ? const Icon(
-                                        Icons.person_rounded,
-                                        color: AppColors.primaryGreen,
-                                        size: 26,
-                                      )
-                                    : null,
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 2),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.1),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: Colors.white,
+                                  backgroundImage: (userProfile?.photoUrl != null &&
+                                          userProfile!.photoUrl.isNotEmpty)
+                                      ? NetworkImage(userProfile.photoUrl)
+                                      : null,
+                                  child: (userProfile?.photoUrl == null ||
+                                          userProfile!.photoUrl.isEmpty)
+                                      ? const Icon(
+                                          Icons.person_rounded,
+                                          color: AppColors.primaryGreen,
+                                          size: 24,
+                                        )
+                                      : null,
+                                ),
                               ),
                             ),
                           ],
@@ -151,31 +198,33 @@ class HomeScreen extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
+                                  color: Colors.black.withValues(alpha: 0.06),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
                             child: const Row(
                               children: [
                                 Icon(Icons.search_rounded,
-                                    color: AppColors.textSecondary),
+                                    color: AppColors.primaryGreen, size: 22),
                                 SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    'Search "milk", "chips", "vegetables"...',
+                                    'Search "milk", "fresh apples", "chips"...',
                                     style: TextStyle(
                                       color: AppColors.textMuted,
                                       fontSize: 14,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ),
                                 Icon(Icons.mic_none_rounded,
-                                    color: AppColors.textSecondary),
+                                    color: AppColors.textSecondary, size: 20),
                               ],
                             ),
                           ),
@@ -188,30 +237,43 @@ class HomeScreen extends StatelessWidget {
                 // Promo Banner Carousel
                 SliverToBoxAdapter(
                   child: Container(
-                    height: 120,
-                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    height: 125,
+                    margin: const EdgeInsets.symmetric(vertical: 14),
                     child: PageView(
-                      controller: PageController(viewportFraction: 0.9),
+                      controller: PageController(viewportFraction: 0.88),
+                      physics: const BouncingScrollPhysics(),
                       children: [
                         _buildPromoCard(
-                          title: 'Fresh Farm Produce',
-                          subtitle: 'Up to 40% OFF Vegetables & Fruits',
+                          title: 'Farm Fresh Harvest',
+                          subtitle: 'Up to 40% OFF Green Vegetables & Fruits',
                           badge: 'FLASH SALE',
-                          color: const Color(0xFF1B5E20),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
                           icon: Icons.eco_rounded,
                         ),
                         _buildPromoCard(
-                          title: 'Late Night Cravings?',
-                          subtitle: 'Chips, Drinks & Chocolates in 8 mins!',
+                          title: 'Instant Munchies',
+                          subtitle: 'Crisps, Cold Drinks & Chocolates in 8 mins!',
                           badge: 'EXPRESS',
-                          color: const Color(0xFF0D47A1),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF0D47A1), Color(0xFF1565C0)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
                           icon: Icons.bolt_rounded,
                         ),
                         _buildPromoCard(
-                          title: 'Daily Milk & Breakfast',
-                          subtitle: 'Get fresh dairy delivered every morning',
+                          title: 'Morning Essentials',
+                          subtitle: 'Farm fresh dairy & bread delivered daily',
                           badge: 'SUPER SAVER',
-                          color: const Color(0xFFE65100),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFE65100), Color(0xFFEF6C00)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
                           icon: Icons.free_breakfast_rounded,
                         ),
                       ],
@@ -226,19 +288,33 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Shop by Category',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Explore Categories',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              '${productProvider.categories.length} Types',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryGreen,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 12),
                         SizedBox(
-                          height: 95,
+                          height: 100,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
                             itemCount: productProvider.categories.length,
                             itemBuilder: (context, index) {
                               final cat = productProvider.categories[index];
@@ -250,13 +326,14 @@ class HomeScreen extends StatelessWidget {
                                   productProvider.selectCategory(cat.name);
                                 },
                                 child: Container(
-                                  width: 75,
+                                  width: 78,
                                   margin: const EdgeInsets.only(right: 12),
                                   child: Column(
                                     children: [
-                                      Container(
-                                        height: 60,
-                                        width: 60,
+                                      AnimatedContainer(
+                                        duration: const Duration(milliseconds: 200),
+                                        height: 62,
+                                        width: 62,
                                         decoration: BoxDecoration(
                                           color: isSelected
                                               ? AppColors.primaryYellow
@@ -265,9 +342,18 @@ class HomeScreen extends StatelessWidget {
                                           border: Border.all(
                                             color: isSelected
                                                 ? AppColors.textPrimary
-                                                : Colors.transparent,
-                                            width: 2,
+                                                : Colors.white,
+                                            width: isSelected ? 2.5 : 1.5,
                                           ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: isSelected
+                                                  ? AppColors.primaryYellow.withValues(alpha: 0.4)
+                                                  : Colors.black.withValues(alpha: 0.04),
+                                              blurRadius: isSelected ? 8 : 4,
+                                              offset: const Offset(0, 3),
+                                            ),
+                                          ],
                                         ),
                                         child: Icon(
                                           cat.iconData,
@@ -286,8 +372,8 @@ class HomeScreen extends StatelessWidget {
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: isSelected
-                                              ? FontWeight.bold
-                                              : FontWeight.w500,
+                                              ? FontWeight.w800
+                                              : FontWeight.w600,
                                           color: isSelected
                                               ? AppColors.primaryGreen
                                               : AppColors.textPrimary,
@@ -316,7 +402,7 @@ class HomeScreen extends StatelessWidget {
                           '${productProvider.selectedCategory} Products',
                           style: const TextStyle(
                             fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
                             color: AppColors.textPrimary,
                           ),
                         ),
@@ -346,19 +432,25 @@ class HomeScreen extends StatelessWidget {
                 else if (productProvider.products.isEmpty)
                   const SliverFillRemaining(
                     child: Center(
-                      child: Text('No products available in this category.'),
+                      child: Text(
+                        'No products available in this category.',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   )
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     sliver: SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         childAspectRatio: 0.65,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 14,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -372,27 +464,27 @@ class HomeScreen extends StatelessWidget {
 
                 // Bottom padding space for floating cart bar
                 const SliverToBoxAdapter(
-                  child: SizedBox(height: 100),
+                  child: SizedBox(height: 110),
                 ),
               ],
             ),
 
-            // Floating Bottom Cart Bar
+            // Floating Bottom Cart Bar with Visual Progress Hint
             if (cartProvider.itemCount > 0)
               Positioned(
                 left: 16,
                 right: 16,
                 bottom: 16,
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryGreen,
-                    borderRadius: BorderRadius.circular(16),
+                    gradient: AppColors.cartGradient,
+                    borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                        color: AppColors.primaryGreen.withValues(alpha: 0.35),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
@@ -402,9 +494,9 @@ class HomeScreen extends StatelessWidget {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(9),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -419,19 +511,20 @@ class HomeScreen extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                '${cartProvider.itemCount} ITEMS',
+                                '${cartProvider.itemCount} ${cartProvider.itemCount == 1 ? "ITEM" : "ITEMS"}',
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 11,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.5,
                                 ),
                               ),
                               Text(
                                 '₹${cartProvider.grandTotal.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w900,
                                 ),
                               ),
                             ],
@@ -443,10 +536,11 @@ class HomeScreen extends StatelessWidget {
                           backgroundColor: AppColors.primaryYellow,
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 10),
+                              horizontal: 18, vertical: 11),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(12),
                           ),
+                          elevation: 0,
                         ),
                         onPressed: () {
                           Navigator.push(
@@ -461,7 +555,7 @@ class HomeScreen extends StatelessWidget {
                             Text(
                               'View Cart',
                               style: TextStyle(
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w800,
                                 fontSize: 14,
                               ),
                             ),
@@ -484,15 +578,22 @@ class HomeScreen extends StatelessWidget {
     required String title,
     required String subtitle,
     required String badge,
-    required Color color,
+    required Gradient gradient,
     required IconData icon,
   }) {
     return Container(
-      margin: const EdgeInsets.only(right: 8),
+      margin: const EdgeInsets.only(right: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -503,41 +604,45 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: AppColors.primaryYellow,
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     badge,
                     style: const TextStyle(
                       color: Colors.black,
                       fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Text(
                   title,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
                 Text(
                   subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 12,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ),
-          Icon(icon, size: 54, color: Colors.white.withOpacity(0.8)),
+          Icon(icon, size: 54, color: Colors.white.withValues(alpha: 0.85)),
         ],
       ),
     );
@@ -559,8 +664,15 @@ class HomeScreen extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -571,16 +683,16 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(12)),
+                        const BorderRadius.vertical(top: Radius.circular(16)),
                     child: Container(
                       width: double.infinity,
-                      color: Colors.grey.shade50,
+                      color: const Color(0xFFF9FAFB),
                       child: Image.network(
                         product.thumbnail,
                         fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => const Icon(
+                        errorBuilder: (context, error, stackTrace) => const Icon(
                           Icons.image_not_supported_outlined,
-                          size: 40,
+                          size: 36,
                           color: AppColors.textMuted,
                         ),
                       ),
@@ -588,45 +700,59 @@ class HomeScreen extends StatelessWidget {
                   ),
                   if (product.discountPercentage > 0)
                     Positioned(
-                      top: 6,
-                      left: 6,
+                      top: 8,
+                      left: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
+                            horizontal: 6, vertical: 3),
                         decoration: BoxDecoration(
                           color: AppColors.discountBadge,
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(6),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.discountBadge.withValues(alpha: 0.3),
+                              blurRadius: 4,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
                         ),
                         child: Text(
                           '${product.discountPercentage.toInt()}% OFF',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ),
                     ),
                   Positioned(
-                    bottom: 6,
-                    left: 6,
+                    bottom: 8,
+                    left: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
+                          horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(4),
+                        color: Colors.white.withValues(alpha: 0.95),
+                        borderRadius: BorderRadius.circular(6),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
                       child: Row(
                         children: [
                           const Icon(Icons.timer_outlined,
-                              size: 10, color: AppColors.primaryGreen),
-                          const SizedBox(width: 2),
+                              size: 11, color: AppColors.primaryGreen),
+                          const SizedBox(width: 3),
                           Text(
                             product.deliveryEta,
                             style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
                               color: AppColors.primaryGreen,
                             ),
                           ),
@@ -638,9 +764,9 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // Content
+            // Content Details
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(10.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -649,21 +775,22 @@ class HomeScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 11,
                       color: AppColors.textMuted,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     product.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 13,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
+                      height: 1.25,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -685,22 +812,26 @@ class HomeScreen extends StatelessWidget {
                                 fontSize: 11,
                                 color: AppColors.textMuted,
                                 decoration: TextDecoration.lineThrough,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                         ],
                       ),
 
-                      // ADD / Quantity Controller
+                      // ADD / Stepper Button
                       if (qty == 0)
                         SizedBox(
-                          height: 32,
-                          width: 64,
+                          height: 34,
+                          width: 68,
                           child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
                               padding: EdgeInsets.zero,
                               backgroundColor: AppColors.lightGreen,
                               side: const BorderSide(
-                                  color: AppColors.primaryGreen),
+                                  color: AppColors.primaryGreen, width: 1.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                             ),
                             onPressed: () {
                               cartProvider.addToCart(product);
@@ -708,8 +839,8 @@ class HomeScreen extends StatelessWidget {
                             child: const Text(
                               'ADD',
                               style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
                                 color: AppColors.primaryGreen,
                               ),
                             ),
@@ -717,10 +848,17 @@ class HomeScreen extends StatelessWidget {
                         )
                       else
                         Container(
-                          height: 32,
+                          height: 34,
                           decoration: BoxDecoration(
                             color: AppColors.primaryGreen,
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primaryGreen.withValues(alpha: 0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Row(
                             children: [
@@ -729,7 +867,7 @@ class HomeScreen extends StatelessWidget {
                                   cartProvider.removeFromCart(product.id);
                                 },
                                 child: const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 6),
+                                  padding: EdgeInsets.symmetric(horizontal: 7),
                                   child: Icon(Icons.remove,
                                       size: 16, color: Colors.white),
                                 ),
@@ -738,7 +876,7 @@ class HomeScreen extends StatelessWidget {
                                 '$qty',
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w900,
                                   fontSize: 13,
                                 ),
                               ),
@@ -747,7 +885,7 @@ class HomeScreen extends StatelessWidget {
                                   cartProvider.addToCart(product);
                                 },
                                 child: const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 6),
+                                  padding: EdgeInsets.symmetric(horizontal: 7),
                                   child: Icon(Icons.add,
                                       size: 16, color: Colors.white),
                                 ),

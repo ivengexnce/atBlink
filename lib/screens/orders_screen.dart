@@ -54,13 +54,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
               )
             : orderProvider.orders.isEmpty
                 ? _buildEmptyState()
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    physics: const AlwaysScrollableScrollPhysics(
-                      parent: BouncingScrollPhysics(),
+                : Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 820),
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics(),
+                        ),
+                        itemCount: orderProvider.orders.length,
+                        itemBuilder: (context, index) =>
+                            _buildOrderCard(orderProvider.orders[index]),
+                      ),
                     ),
-                    itemCount: orderProvider.orders.length,
-                    itemBuilder: (context, index) => _buildOrderCard(orderProvider.orders[index]),
                   ),
       ),
     );

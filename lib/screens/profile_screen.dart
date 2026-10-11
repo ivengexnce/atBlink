@@ -44,10 +44,13 @@ class ProfileScreen extends StatelessWidget {
       ),
       body: userProfile == null
           ? const Center(child: Text('No profile found'))
-          : SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              child: Column(
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 720),
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
                 children: [
                   // Profile Header Card
                   Container(
@@ -406,6 +409,8 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ),
     );
   }
 

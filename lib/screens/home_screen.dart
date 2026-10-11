@@ -513,7 +513,7 @@ class HomeScreen extends StatelessWidget {
                               crossAxisSpacing: 14,
                               mainAxisSpacing: 14,
                             ),
-                            sliver: SliverChildBuilderDelegate(
+                            delegate: SliverChildBuilderDelegate(
                               (context, index) {
                                 final product = productProvider.products[index];
                                 return _ProductCard(

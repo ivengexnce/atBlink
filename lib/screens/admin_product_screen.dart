@@ -61,6 +61,11 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
     final inStockCount = allProducts.where((p) => p.stock > 0).length;
     final outOfStockCount = allProducts.length - inStockCount;
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth >= 850;
+    final double horizontalPadding =
+        screenWidth > 1140 ? (screenWidth - 1100) / 2 : 16.0;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -109,7 +114,8 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
                 // Top Metrics & Sync Status Card
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.fromLTRB(
+                        horizontalPadding, 16, horizontalPadding, 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -189,7 +195,7 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
                     height: 42,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                       children: [
                         _buildCategoryChip('All', allProducts.length),
                         ..._categoryOptions.map((cat) {
@@ -205,7 +211,7 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
 
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-                // Product List View
+                // Product List / Grid View
                 if (filtered.isEmpty)
                   SliverFillRemaining(
                     hasScrollBody: false,
@@ -243,14 +249,37 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
                       ),
                     ),
                   )
+                else if (isDesktop)
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(
+                        horizontalPadding, 0, horizontalPadding, 90),
+                    sliver: SliverGrid(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: screenWidth >= 1150 ? 3 : 2,
+                        childAspectRatio: 2.3,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 14,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final product = filtered[index];
+                          return _buildProductCard(
+                              context, product, productProvider);
+                        },
+                        childCount: filtered.length,
+                      ),
+                    ),
+                  )
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 90),
+                    padding: EdgeInsets.fromLTRB(
+                        horizontalPadding, 0, horizontalPadding, 90),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           final product = filtered[index];
-                          return _buildProductCard(context, product, productProvider);
+                          return _buildProductCard(
+                              context, product, productProvider);
                         },
                         childCount: filtered.length,
                       ),

@@ -72,8 +72,11 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
         ],
       ),
-      body: Stack(
-        children: [
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: Stack(
+            children: [
           Column(
             children: [
               // Quick suggestion pills
@@ -387,6 +390,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

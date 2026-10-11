@@ -30,7 +30,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Future<void> _loadReviews() async {
-    final reviews = await _firestoreService.fetchProductReviews(widget.product.id);
+    final reviews =
+        await _firestoreService.fetchProductReviews(widget.product.id);
     if (mounted) {
       setState(() {
         _reviews = reviews;
@@ -65,7 +66,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(24)),
                 ),
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                 child: Column(
@@ -106,12 +108,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 14,
-                                  color: AppColors.textPrimary,
                                 ),
                               ),
-                              const SizedBox(height: 2),
                               const Text(
-                                'Rate & Review this Product',
+                                'Rate your fresh experience',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: AppColors.textMuted,
@@ -122,34 +122,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                       ],
                     ),
-                    const Divider(height: 24),
-                    const Center(
-                      child: Text(
-                        'Tap stars to rate:',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // Star Rating Picker
+                    const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(5, (index) {
-                        final starNumber = index + 1;
-                        final isFilled = starNumber <= selectedRating;
+                        final starValue = index + 1.0;
+                        final isFilled = starValue <= selectedRating;
                         return IconButton(
-                          iconSize: 36,
                           onPressed: () {
                             setModalState(() {
-                              selectedRating = starNumber.toDouble();
+                              selectedRating = starValue;
                             });
                           },
                           icon: Icon(
-                            isFilled ? Icons.star_rounded : Icons.star_outline_rounded,
+                            isFilled
+                                ? Icons.star_rounded
+                                : Icons.star_outline_rounded,
                             color: const Color(0xFFFFB800),
+                            size: 32,
                           ),
                         );
                       }),
@@ -159,21 +149,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       controller: commentController,
                       maxLines: 3,
                       decoration: InputDecoration(
-                        hintText: 'Share your experience (e.g. Freshness, taste, quality)...',
-                        hintStyle: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                        hintText:
+                            'Share your experience (e.g. Freshness, taste, quality)...',
+                        hintStyle: const TextStyle(
+                            fontSize: 13, color: AppColors.textMuted),
                         filled: true,
                         fillColor: const Color(0xFFF9FAFB),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.border),
+                          borderSide:
+                              const BorderSide(color: AppColors.border),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.border),
+                          borderSide:
+                              const BorderSide(color: AppColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
+                          borderSide: const BorderSide(
+                              color: AppColors.primaryGreen, width: 2),
                         ),
                       ),
                     ),
@@ -182,27 +177,34 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryGreen,
                         minimumSize: const Size(double.infinity, 48),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () async {
                         final comment = commentController.text.trim();
-                        final reviewId = 'rev_${DateTime.now().millisecondsSinceEpoch}';
+                        final reviewId =
+                            'rev_${DateTime.now().millisecondsSinceEpoch}';
 
                         final newReview = ReviewModel(
                           id: reviewId,
                           productId: widget.product.id,
                           userId: user?.id ?? 'guest',
-                          userName: user?.name.isNotEmpty == true ? user!.name : 'Verified Shopper',
+                          userName: user?.name.isNotEmpty == true
+                              ? user!.name
+                              : 'Verified Shopper',
                           userPhoto: user?.photoUrl ?? '',
                           rating: selectedRating,
-                          comment: comment.isNotEmpty ? comment : 'Great product, loved it!',
+                          comment: comment.isNotEmpty
+                              ? comment
+                              : 'Great product, loved it!',
                           createdAt: DateTime.now(),
                         );
 
                         Navigator.pop(ctx);
 
                         // Submit to Firebase Firestore
-                        await _firestoreService.submitProductReview(newReview);
+                        await _firestoreService
+                            .submitProductReview(newReview);
 
                         setState(() {
                           _reviews.insert(0, newReview);
@@ -211,7 +213,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('⭐ Review submitted to Firebase!'),
+                              content:
+                                  Text('⭐ Review submitted to Firebase!'),
                               backgroundColor: AppColors.primaryGreen,
                               duration: Duration(seconds: 2),
                               behavior: SnackBarBehavior.floating,
@@ -242,6 +245,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget build(BuildContext context) {
     final cartProvider = context.watch<CartProvider>();
     final qty = cartProvider.getProductQuantity(widget.product.id);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth >= 850;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -283,403 +288,270 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: isDesktop
+              ? _buildDesktopLayout(cartProvider, qty)
+              : _buildMobileLayout(cartProvider, qty),
+        ),
+      ),
+    );
+  }
+
+  // Desktop 2-Column Split
+  Widget _buildDesktopLayout(CartProvider cartProvider, int qty) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.all(28),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Left Column (Image & Trust Badges)
           Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Image Showcase Card
-                  Container(
-                    height: 260,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF9FAFB),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Stack(
-                      children: [
-                        Center(
-                          child: Hero(
-                            tag: 'product_img_${widget.product.id}',
-                            child: Image.network(
-                              widget.product.thumbnail,
-                              fit: BoxFit.contain,
-                              height: 210,
-                              cacheWidth: 450,
-                              cacheHeight: 450,
-                              errorBuilder: (context, error, stackTrace) => const Icon(
-                                Icons.image_not_supported_outlined,
-                                size: 64,
-                                color: AppColors.textMuted,
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (widget.product.discountPercentage > 0)
-                          Positioned(
-                            top: 14,
-                            left: 14,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: AppColors.discountBadge,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                '${widget.product.discountPercentage.toInt()}% OFF',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+            flex: 5,
+            child: Column(
+              children: [
+                _buildImageShowcase(height: 380),
+                const SizedBox(height: 20),
+                _buildWhyAtBlinkFeatures(),
+              ],
+            ),
+          ),
+          const SizedBox(width: 36),
 
-                  const SizedBox(height: 20),
+          // Right Column (Details, Actions, Reviews)
+          Expanded(
+            flex: 6,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeaderDetails(),
+                const SizedBox(height: 14),
+                _buildPriceSection(),
+                const SizedBox(height: 20),
+                // Inline Desktop Cart Action Button
+                _buildDesktopAddToCartBar(cartProvider, qty),
+                const Divider(height: 36),
+                _buildDescriptionSection(),
+                const Divider(height: 36),
+                _buildReviewsSection(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                  // Title & Rating Badge
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.product.title,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
+  // Mobile Stacked Layout with Sticky Bottom Bar
+  Widget _buildMobileLayout(CartProvider cartProvider, int qty) {
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildImageShowcase(height: 260),
+                const SizedBox(height: 20),
+                _buildHeaderDetails(),
+                const SizedBox(height: 14),
+                _buildPriceSection(),
+                const Divider(height: 32),
+                _buildWhyAtBlinkFeatures(),
+                const SizedBox(height: 20),
+                _buildDescriptionSection(),
+                const Divider(height: 32),
+                _buildReviewsSection(),
+              ],
+            ),
+          ),
+        ),
+        // Sticky Bottom Add to Cart Bar for Mobile
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 10,
+                offset: const Offset(0, -3),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            top: false,
+            child: Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'TOTAL PRICE',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textMuted,
+                        letterSpacing: 0.5,
                       ),
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryGreen,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              _averageRating.toStringAsFixed(1),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            const SizedBox(width: 3),
-                            const Icon(Icons.star, color: Colors.white, size: 14),
-                          ],
-                        ),
+                    ),
+                    Text(
+                      '₹${(widget.product.discountedPrice * (qty > 0 ? qty : 1)).toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.textPrimary,
                       ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  Text(
-                    'Unit / Net Weight: ${widget.product.unitQuantity}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
                     ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // Price
-                  Row(
-                    children: [
-                      Text(
-                        '₹${widget.product.discountedPrice.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      if (widget.product.discountPercentage > 0)
-                        Text(
-                          '₹${widget.product.price.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: AppColors.textMuted,
-                            decoration: TextDecoration.lineThrough,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                    ],
-                  ),
-
-                  const Divider(height: 32),
-
-                  // Why atBlink Feature Card
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Column(
-                          children: [
-                            Icon(Icons.timer_outlined, color: AppColors.primaryGreen, size: 22),
-                            SizedBox(height: 4),
-                            Text('10 Mins ETA',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Icon(Icons.shield_outlined, color: AppColors.primaryGreen, size: 22),
-                            SizedBox(height: 4),
-                            Text('Fresh Guarantee',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Icon(Icons.replay_rounded, color: AppColors.primaryGreen, size: 22),
-                            SizedBox(height: 4),
-                            Text('Easy Return',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Description
-                  const Text(
-                    'About this Product',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.product.description,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                      height: 1.5,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-
-                  const Divider(height: 32),
-
-                  // ----------------------------------------------------
-                  // Ratings & User Reviews Section (Firebase Sync)
-                  // ----------------------------------------------------
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Ratings & Reviews',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimary,
+                  ],
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: qty == 0
+                      ? ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Row(
+                          onPressed: () {
+                            cartProvider.addToCart(widget.product);
+                          },
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.star_rounded, color: Color(0xFFFFB800), size: 18),
-                              const SizedBox(width: 4),
+                              Icon(Icons.add_shopping_cart_rounded, size: 20),
+                              SizedBox(width: 8),
                               Text(
-                                '${_averageRating.toStringAsFixed(1)} out of 5',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              Text(
-                                ' (${_reviews.length} ${_reviews.length == 1 ? "review" : "reviews"})',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textMuted,
+                                'ADD TO CART',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 14,
                                 ),
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                      OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primaryGreen,
-                          side: const BorderSide(color: AppColors.primaryGreen, width: 1.2),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        )
+                      : Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryGreen,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.remove_rounded,
+                                    color: Colors.white),
+                                onPressed: () {
+                                  cartProvider.removeFromCart(widget.product.id);
+                                },
+                              ),
+                              Text(
+                                '$qty IN CART',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.add_rounded,
+                                    color: Colors.white),
+                                onPressed: () {
+                                  cartProvider.addToCart(widget.product);
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                        onPressed: () => _showRateProductBottomSheet(context),
-                        icon: const Icon(Icons.rate_review_outlined, size: 16),
-                        label: const Text(
-                          'Rate',
-                          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  if (_isLoadingReviews)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(16),
-                        child: CircularProgressIndicator(color: AppColors.primaryGreen),
-                      ),
-                    )
-                  else if (_reviews.isEmpty)
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF9FAFB),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'No reviews yet. Be the first to rate this product!',
-                          style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-                        ),
-                      ),
-                    )
-                  else
-                    ..._reviews.map((rev) => _buildReviewCard(rev)),
-
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
-          ),
-
-          // Bottom Action Bar
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 10,
-                  offset: const Offset(0, -3),
                 ),
               ],
             ),
-            child: SafeArea(
-              top: false,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImageShowcase({required double height}) {
+    return Container(
+      height: height,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Stack(
+        children: [
+          Center(
+            child: Hero(
+              tag: 'product_img_${widget.product.id}',
+              child: Image.network(
+                widget.product.thumbnail,
+                fit: BoxFit.contain,
+                height: height * 0.78,
+                cacheWidth: 450,
+                cacheHeight: 450,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.image_not_supported_rounded,
+                  size: 64,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ),
+          ),
+          if (widget.product.discountPercentage > 0)
+            Positioned(
+              top: 14,
+              left: 14,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.discountBadge,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${widget.product.discountPercentage.toInt()}% OFF',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+          Positioned(
+            bottom: 14,
+            left: 14,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.95),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.border),
+              ),
               child: Row(
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'TOTAL PRICE',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textMuted,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      Text(
-                        '₹${(widget.product.discountedPrice * (qty > 0 ? qty : 1)).toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: qty == 0
-                        ? ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                            onPressed: () {
-                              cartProvider.addToCart(widget.product);
-                            },
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.add_shopping_cart_rounded, size: 20),
-                                SizedBox(width: 8),
-                                Text(
-                                  'ADD TO CART',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : Container(
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryGreen,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.remove, color: Colors.white),
-                                  onPressed: () {
-                                    cartProvider.removeFromCart(widget.product.id);
-                                  },
-                                ),
-                                Text(
-                                  '$qty IN CART',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.add, color: Colors.white),
-                                  onPressed: () {
-                                    cartProvider.addToCart(widget.product);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
+                  const Icon(Icons.bolt_rounded,
+                      size: 14, color: AppColors.primaryGreen),
+                  const SizedBox(width: 4),
+                  Text(
+                    widget.product.deliveryEta,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primaryGreen,
+                    ),
                   ),
                 ],
               ),
@@ -687,6 +559,289 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildHeaderDetails() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                widget.product.title,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textPrimary,
+                  height: 1.2,
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
+              decoration: BoxDecoration(
+                color: AppColors.primaryGreen,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _averageRating.toStringAsFixed(1),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(width: 3),
+                  const Icon(Icons.star_rounded,
+                      color: Colors.white, size: 15),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Unit / Net Weight: ${widget.product.unitQuantity}',
+          style: const TextStyle(
+            fontSize: 14,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPriceSection() {
+    return Row(
+      children: [
+        Text(
+          '₹${widget.product.discountedPrice.toStringAsFixed(2)}',
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(width: 10),
+        if (widget.product.discountPercentage > 0)
+          Text(
+            '₹${widget.product.price.toStringAsFixed(2)}',
+            style: const TextStyle(
+              fontSize: 16,
+              color: AppColors.textMuted,
+              decoration: TextDecoration.lineThrough,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        const SizedBox(width: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: AppColors.lightGreen,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Text(
+            'IN STOCK',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primaryGreen,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopAddToCartBar(CartProvider cartProvider, int qty) {
+    return Row(
+      children: [
+        if (qty == 0)
+          Expanded(
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryGreen,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () => cartProvider.addToCart(widget.product),
+              icon: const Icon(Icons.add_shopping_cart_rounded, size: 20),
+              label: const Text(
+                'ADD TO CART',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+              ),
+            ),
+          )
+        else
+          Expanded(
+            child: Container(
+              height: 52,
+              decoration: BoxDecoration(
+                color: AppColors.primaryGreen,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove_rounded, color: Colors.white),
+                    onPressed: () =>
+                        cartProvider.removeFromCart(widget.product.id),
+                  ),
+                  Text(
+                    '$qty IN CART',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 14,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add_rounded, color: Colors.white),
+                    onPressed: () => cartProvider.addToCart(widget.product),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildWhyAtBlinkFeatures() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Column(
+            children: [
+              Icon(Icons.bolt_rounded,
+                  color: AppColors.primaryGreen, size: 24),
+              SizedBox(height: 4),
+              Text('10 Mins ETA',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+            ],
+          ),
+          Column(
+            children: [
+              Icon(Icons.verified_user_rounded,
+                  color: AppColors.primaryGreen, size: 24),
+              SizedBox(height: 4),
+              Text('Fresh Guarantee',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+            ],
+          ),
+          Column(
+            children: [
+              Icon(Icons.published_with_changes_rounded,
+                  color: AppColors.primaryGreen, size: 24),
+              SizedBox(height: 4),
+              Text('Easy Return',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDescriptionSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'About this Product',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          widget.product.description,
+          style: const TextStyle(
+            fontSize: 14,
+            color: AppColors.textSecondary,
+            height: 1.5,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReviewsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Customer Reviews',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  '${_reviews.length} ratings on Firebase',
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textMuted),
+                ),
+              ],
+            ),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primaryGreen,
+                side: const BorderSide(color: AppColors.primaryGreen),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () => _showRateProductBottomSheet(context),
+              icon: const Icon(Icons.rate_review_rounded, size: 16),
+              label: const Text('Write Review',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        if (_isLoadingReviews)
+          const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGreen))
+        else if (_reviews.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              'No reviews yet. Be the first to review this product!',
+              style: TextStyle(fontSize: 13, color: AppColors.textMuted),
+            ),
+          )
+        else
+          ..._reviews.map((r) => _buildReviewCard(r)),
+      ],
     );
   }
 
@@ -708,7 +863,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 radius: 14,
                 backgroundColor: AppColors.primaryGreen.withValues(alpha: 0.15),
                 child: Text(
-                  review.userName.isNotEmpty ? review.userName[0].toUpperCase() : 'U',
+                  review.userName.isNotEmpty
+                      ? review.userName[0].toUpperCase()
+                      : 'U',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,

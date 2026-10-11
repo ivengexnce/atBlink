@@ -209,10 +209,13 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          child: Column(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Column(
             children: [
               // Success Header
               Container(
@@ -653,8 +656,9 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildDynamicStepRow({
     required String title,

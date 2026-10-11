@@ -70,36 +70,54 @@ service cloud.firestore {
     // 1. PRODUCTS CATALOG COLLECTION
     // ---------------------------------------------------------------
     match /products/{productId} {
-      // Anyone can browse products; store managers & admin can manage & seed
-      allow read, write: if true;
+      // Anyone can browse products in the storefront
+      allow read: if true;
+
+      // Only authenticated store managers and admins can add, edit, or delete items
+      allow write: if isAuthenticated();
     }
 
     // ---------------------------------------------------------------
-    // 2. USERS & USER ORDERS
+    // 2. USERS & PRIVATE USER DATA
     // ---------------------------------------------------------------
     match /users/{userId} {
-      // Allows user profiles to sync for authenticated, guest, and demo sessions
-      allow read, write: if true;
+      // Users can only view and modify their own personal profile
+      allow read, write: if isOwner(userId);
 
+      // User-specific order subcollection
       match /orders/{orderId} {
-        allow read, write: if true;
+        allow read, write: if isOwner(userId);
       }
     }
 
     // ---------------------------------------------------------------
-    // 3. ORDERS COLLECTION
+    // 3. GLOBAL ORDERS COLLECTION
     // ---------------------------------------------------------------
     match /orders/{orderId} {
-      // Customers can place orders and track their deliveries
-      allow read, write: if true;
+      // Shoppers can only view their own placed orders
+      allow read: if isAuthenticated() && (
+        resource == null || resource.data.userId == request.auth.uid
+      );
+
+      // Authenticated users can place orders tied to their own account
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+
+      // Updating order status
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
     // ---------------------------------------------------------------
     // 4. PRODUCT REVIEWS COLLECTION
     // ---------------------------------------------------------------
     match /product_reviews/{reviewId} {
-      // Community ratings and reviews
-      allow read, write: if true;
+      // Anyone can read community ratings and reviews
+      allow read: if true;
+
+      // Only authenticated shoppers can post reviews for their own UID
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+
+      // Only the author can edit or delete their review
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
   }
 }

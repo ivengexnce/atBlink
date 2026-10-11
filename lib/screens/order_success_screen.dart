@@ -73,6 +73,17 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
     _pulseScale = Tween<double>(begin: 0.9, end: 1.15).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && widget.order != null && _currentStep < 4) {
+        try {
+          final provider = context.read<OrderProvider>();
+          if (!provider.isAutoUpdating(widget.order!.orderId)) {
+            provider.startAutoProgress(widget.order!.orderId, widget.order!.userId);
+          }
+        } catch (_) {}
+      }
+    });
   }
 
   void _initInitialStep() {
@@ -82,29 +93,28 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
       _secondsLeft = 0;
     } else if (status.contains('Out for Express') || status.contains('Out for Delivery')) {
       _currentStep = 3;
-      _secondsLeft = 320;
+      _secondsLeft = 160;
     } else if (status.contains('Rider Assigned')) {
       _currentStep = 2;
-      _secondsLeft = 590;
-    } else if (status.contains('Packed')) {
+      _secondsLeft = 360;
+    } else if (status.contains('Packed') || status.contains('Picked')) {
       _currentStep = 1;
-      _secondsLeft = 595;
+      _secondsLeft = 480;
     } else {
-      _currentStep = 2; // Default active step
+      _currentStep = 0; // Starts at 'Order Confirmed'
+      _secondsLeft = 590;
     }
   }
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       if (_secondsLeft > 0) {
         setState(() {
           _secondsLeft--;
-          // Automatically advance stages as timer progresses
-          if (_secondsLeft == 300 && _currentStep < 3) {
-            _advanceStep(isAuto: true, targetStep: 3);
-          } else if (_secondsLeft == 0 && _currentStep < 4) {
-            _advanceStep(isAuto: true, targetStep: 4);
-          }
         });
       } else {
         _timer?.cancel();
@@ -113,16 +123,22 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
   }
 
   void _advanceStep({bool isAuto = false, int? targetStep}) {
-    final newStep = targetStep ?? (_currentStep + 1) % _deliveryStages.length;
-    setState(() {
-      _currentStep = newStep;
-      if (_currentStep == 4) {
-        _secondsLeft = 0;
-      }
-    });
-
-    final newStatus = _deliveryStages[_currentStep]['status'] ?? 'In Progress';
-    _syncStatusToFirebase(newStatus);
+    final order = widget.order;
+    if (order != null) {
+      final nextStep = targetStep ?? ((_currentStep + 1) % _deliveryStages.length);
+      final newStatus = _deliveryStages[nextStep]['status'] ?? 'In Progress';
+      _syncStatusToFirebase(newStatus);
+    } else {
+      setState(() {
+        _currentStep = targetStep ?? ((_currentStep + 1) % _deliveryStages.length);
+        if (_currentStep == 4) {
+          _secondsLeft = 0;
+        } else {
+          final times = [590, 480, 360, 160, 0];
+          _secondsLeft = times[_currentStep];
+        }
+      });
+    }
 
     if (!isAuto && mounted) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -152,11 +168,13 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
   void _syncStatusToFirebase(String newStatus) {
     final order = widget.order;
     if (order != null) {
-      context.read<OrderProvider>().updateOrderStatus(
-            order.orderId,
-            order.userId,
-            newStatus,
-          );
+      try {
+        context.read<OrderProvider>().updateOrderStatus(
+              order.orderId,
+              order.userId,
+              newStatus,
+            );
+      } catch (_) {}
     }
   }
 
@@ -183,9 +201,42 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
 
   @override
   Widget build(BuildContext context) {
-    final order = widget.order;
-    final orderId = order?.orderId ?? 'ATB-998241';
-    final deliveryAddress = order?.deliveryAddress ??
+    OrderProvider? orderProvider;
+    try {
+      orderProvider = context.watch<OrderProvider>();
+    } catch (_) {
+      orderProvider = null;
+    }
+
+    final orderId = widget.order?.orderId ?? 'ATB-998241';
+    final liveOrder = orderProvider?.orders.firstWhere(
+          (o) => o.orderId == orderId,
+          orElse: () => widget.order ?? OrderModel(
+            orderId: orderId,
+            items: [],
+            subtotal: 0,
+            deliveryFee: 0,
+            handlingFee: 0,
+            grandTotal: 0,
+            deliveryAddress: 'Flat 402, Green Park Heights, Cyber City',
+          ),
+        ) ?? widget.order;
+
+    if (orderProvider != null && liveOrder != null) {
+      final stepFromProvider = orderProvider.getStageIndex(liveOrder.status);
+      if (stepFromProvider != _currentStep) {
+        _currentStep = stepFromProvider;
+        if (_currentStep == 4) {
+          _secondsLeft = 0;
+        } else {
+          final times = [590, 480, 360, 160, 0];
+          _secondsLeft = times[_currentStep];
+        }
+      }
+    }
+
+    final deliveryAddress = liveOrder?.deliveryAddress ??
+        widget.order?.deliveryAddress ??
         'Flat 402, Green Park Heights, Cyber City';
 
     final isDelivered = _currentStep == 4;
@@ -289,6 +340,64 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
                         fontWeight: FontWeight.w700,
                       ),
                     ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Real-Time Auto-Updating Banner
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isDelivered ? const Color(0xFFE8F5E9) : const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isDelivered ? const Color(0xFFA5D6A7) : AppColors.primaryGreen,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!isDelivered) ...[
+                      AnimatedBuilder(
+                        animation: _pulseScale,
+                        builder: (context, child) => Transform.scale(
+                          scale: _pulseScale.value,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: AppColors.primaryGreen,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'LIVE AUTO-UPDATING • EXPRESS TRACKING ACTIVE',
+                        style: TextStyle(
+                          color: AppColors.primaryGreen,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ] else ...[
+                      const Icon(Icons.check_circle_rounded, color: AppColors.primaryGreen, size: 14),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'DELIVERY COMPLETE • ORDER DELIVERED',
+                        style: TextStyle(
+                          color: AppColors.primaryGreen,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -601,7 +710,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
                         icon: const Icon(Icons.fast_forward_rounded, size: 16),
                         label: Text(
                           _currentStep < _deliveryStages.length - 1
-                              ? 'Simulate Next Stage ⚡'
+                              ? 'Fast-Forward to Next Stage ⚡ (Auto-advances every 8s)'
                               : 'Restart Delivery Simulation ↺',
                           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                         ),

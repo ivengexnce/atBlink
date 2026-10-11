@@ -81,6 +81,7 @@ class CartProvider extends ChangeNotifier {
       handlingFee: handlingFee,
       grandTotal: grandTotal,
       deliveryAddress: deliveryAddress,
+      status: 'Order Confirmed',
     );
   }
 

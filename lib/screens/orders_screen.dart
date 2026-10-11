@@ -7,6 +7,7 @@ import '../providers/order_provider.dart';
 import '../providers/profile_provider.dart';
 import '../utils/constants.dart';
 import 'home_screen.dart';
+import 'order_success_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -137,81 +138,103 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Widget _buildOrderCard(OrderModel order) {
     final d = order.orderedAt;
     final dateStr = '${d.day}/${d.month}/${d.year} at ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+    final isDelivered = order.status.contains('Delivered');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(
+          color: isDelivered ? AppColors.border : AppColors.primaryGreen.withOpacity(0.4),
+          width: isDelivered ? 1.0 : 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: isDelivered
+                ? Colors.black.withValues(alpha: 0.03)
+                : AppColors.primaryGreen.withOpacity(0.08),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Order Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: const BoxDecoration(
-              color: Color(0xFFFAFAFA),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      order.orderId,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 14,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      dateStr,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textMuted,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: AppColors.mintGreen,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => OrderSuccessScreen(order: order)),
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Order Header
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: isDelivered ? const Color(0xFFFAFAFA) : const Color(0xFFF1F8E9),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.bolt_rounded, size: 14, color: AppColors.primaryGreen),
-                      const SizedBox(width: 2),
                       Text(
-                        order.status,
+                        order.orderId,
                         style: const TextStyle(
-                          color: AppColors.primaryGreen,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 14,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        dateStr,
+                        style: const TextStyle(
                           fontSize: 11,
-                          fontWeight: FontWeight.w800,
+                          color: AppColors.textMuted,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: isDelivered ? AppColors.mintGreen : const Color(0xFFE8F5E9),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isDelivered ? const Color(0xFFA5D6A7) : AppColors.primaryGreen,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isDelivered ? Icons.check_circle_rounded : Icons.bolt_rounded,
+                          size: 14,
+                          color: AppColors.primaryGreen,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          isDelivered ? 'Delivered' : '${order.status} • Live',
+                          style: const TextStyle(
+                            color: AppColors.primaryGreen,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
 
           Padding(
             padding: const EdgeInsets.all(16),
@@ -315,32 +338,59 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         ),
                       ],
                     ),
-                    OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primaryGreen,
-                        side: const BorderSide(color: AppColors.primaryGreen, width: 1.2),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      onPressed: () {
-                        final cart = context.read<CartProvider>();
-                        for (final item in order.items) {
-                          cart.addToCart(item.product);
-                        }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Items re-added to cart!'),
-                            backgroundColor: AppColors.primaryGreen,
-                            duration: Duration(seconds: 2),
-                            behavior: SnackBarBehavior.floating,
+                    Row(
+                      children: [
+                        if (!isDelivered) ...[
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryGreen,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              elevation: 0,
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => OrderSuccessScreen(order: order)),
+                              );
+                            },
+                            icon: const Icon(Icons.navigation_rounded, size: 14),
+                            label: const Text(
+                              'Track Live',
+                              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+                            ),
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.replay_rounded, size: 16),
-                      label: const Text(
-                        'Reorder',
-                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-                      ),
+                          const SizedBox(width: 8),
+                        ],
+                        OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primaryGreen,
+                            side: const BorderSide(color: AppColors.primaryGreen, width: 1.2),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                          onPressed: () {
+                            final cart = context.read<CartProvider>();
+                            for (final item in order.items) {
+                              cart.addToCart(item.product);
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Items re-added to cart!'),
+                                backgroundColor: AppColors.primaryGreen,
+                                duration: Duration(seconds: 2),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.replay_rounded, size: 16),
+                          label: const Text(
+                            'Reorder',
+                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -349,6 +399,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

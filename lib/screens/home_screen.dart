@@ -23,11 +23,8 @@ class HomeScreen extends StatelessWidget {
     final profileProvider = context.watch<ProfileProvider>();
     final productProvider = context.watch<ProductProvider>();
     final cartProvider = context.watch<CartProvider>();
-    final userProfile = profileProvider.userProfile;
-
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth >= 900;
-    final isTablet = screenWidth >= 600 && screenWidth < 900;
     final double horizontalPadding = screenWidth > 1240 ? (screenWidth - 1240) / 2 : 16.0;
 
     return Scaffold(

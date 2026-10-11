@@ -657,7 +657,8 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
         ),
       ),
     ),
-  );
+  ),
+);
 }
 
   Widget _buildDynamicStepRow({

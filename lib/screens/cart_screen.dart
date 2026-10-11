@@ -6,7 +6,6 @@ import '../providers/cart_provider.dart';
 import '../providers/order_provider.dart';
 import '../providers/profile_provider.dart';
 import '../utils/constants.dart';
-import '../utils/responsive.dart';
 import 'order_success_screen.dart';
 
 class CartScreen extends StatefulWidget {

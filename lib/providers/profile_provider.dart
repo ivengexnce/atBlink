@@ -27,7 +27,6 @@ class ProfileProvider extends ChangeNotifier {
   Future<void> setProfile(UserProfile profile) async {
     _userProfile = profile;
     await _saveProfileToStorage();
-    // Sync login metadata to Firestore
     _firestoreService.saveUserLoginInfo(profile);
     notifyListeners();
   }
@@ -36,19 +35,17 @@ class ProfileProvider extends ChangeNotifier {
   Future<void> _loadProfileFromStorage() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String? profileJson = prefs.getString(AppConstants.keyUserProfile);
+      final profileJson = prefs.getString(AppConstants.keyUserProfile);
       if (profileJson != null) {
         _userProfile = UserProfile.fromJson(profileJson);
         notifyListeners();
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error loading stored profile: $e');
-      }
+      debugPrint('Error loading stored profile: $e');
     }
   }
 
-  // UPDATE Profile Info (Name, Phone, Address, Bio, Photo)
+  // UPDATE Profile Info
   Future<bool> updateProfile({
     required String name,
     required String phone,
@@ -66,7 +63,6 @@ class ProfileProvider extends ChangeNotifier {
     try {
       String photoUrl = _userProfile!.photoUrl;
 
-      // Upload image to Firebase Storage if selected
       if (newImageFile != null || newImageBytes != null) {
         final uploadedUrl = await _storageService.uploadProfileImage(
           userId: _userProfile!.id,
@@ -78,7 +74,6 @@ class ProfileProvider extends ChangeNotifier {
         }
       }
 
-      // Update UserProfile model
       _userProfile = _userProfile!.copyWith(
         name: name,
         phone: phone,
@@ -89,14 +84,13 @@ class ProfileProvider extends ChangeNotifier {
 
       await _saveProfileToStorage();
       _firestoreService.saveUserLoginInfo(_userProfile!);
-      _isLoading = false;
-      notifyListeners();
       return true;
     } catch (e) {
-      _isLoading = false;
       _errorMessage = 'Failed to update profile: $e';
-      notifyListeners();
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -120,6 +114,7 @@ class ProfileProvider extends ChangeNotifier {
   // DELETE Profile / Reset Account Data
   Future<bool> deleteProfile() async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -128,16 +123,14 @@ class ProfileProvider extends ChangeNotifier {
       }
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(AppConstants.keyUserProfile);
-
       _userProfile = null;
-      _isLoading = false;
-      notifyListeners();
       return true;
     } catch (e) {
-      _isLoading = false;
       _errorMessage = 'Failed to delete profile: $e';
-      notifyListeners();
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -147,9 +140,7 @@ class ProfileProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(AppConstants.keyUserProfile, _userProfile!.toJson());
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving profile: $e');
-      }
+      debugPrint('Error saving profile: $e');
     }
   }
 }

@@ -34,6 +34,40 @@ class Product {
     return price * (1 - (discountPercentage / 100));
   }
 
+  Product copyWith({
+    int? id,
+    String? title,
+    String? description,
+    double? price,
+    double? discountPercentage,
+    double? rating,
+    int? stock,
+    String? brand,
+    String? category,
+    String? thumbnail,
+    List<String>? images,
+    String? unitQuantity,
+    String? deliveryEta,
+  }) {
+    return Product(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      discountPercentage: discountPercentage ?? this.discountPercentage,
+      rating: rating ?? this.rating,
+      stock: stock ?? this.stock,
+      brand: brand ?? this.brand,
+      category: category ?? this.category,
+      thumbnail: thumbnail ?? this.thumbnail,
+      images: images ?? this.images,
+      unitQuantity: unitQuantity ?? this.unitQuantity,
+      deliveryEta: deliveryEta ?? this.deliveryEta,
+    );
+  }
+
+  Map<String, dynamic> toMap() => toJson();
+
   factory Product.fromJson(Map<String, dynamic> json) {
     List<String> imgList = [];
     if (json['images'] != null) {

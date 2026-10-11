@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../models/order_model.dart';
 import '../services/firestore_service.dart';
 
@@ -16,19 +17,18 @@ class OrderProvider extends ChangeNotifier {
   /// Place and save an order to Firebase Firestore
   Future<bool> placeOrder(OrderModel order) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
-
     try {
       await _firestoreService.saveOrder(order);
       _orders.insert(0, order);
-      _isLoading = false;
-      notifyListeners();
       return true;
     } catch (e) {
-      _isLoading = false;
       _errorMessage = 'Failed to place order: $e';
-      notifyListeners();
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -37,14 +37,12 @@ class OrderProvider extends ChangeNotifier {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
-
     try {
       _orders = await _firestoreService.fetchUserOrders(userId);
-      _isLoading = false;
-      notifyListeners();
     } catch (e) {
-      _isLoading = false;
       _errorMessage = 'Error loading orders: $e';
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }

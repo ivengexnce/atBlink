@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/order_model.dart';
+import '../models/product_model.dart';
 import '../models/review_model.dart';
 import '../models/user_profile_model.dart';
 
@@ -274,5 +277,143 @@ class FirestoreService {
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
       ),
     ];
+  }
+
+  // ---------------------------------------------------------
+  // 4. PRODUCT CATALOG MANAGEMENT IN FIRESTORE & LOCAL ADMIN CACHE
+  // ---------------------------------------------------------
+
+  static const String _keyProducts = 'admin_catalog_products';
+
+  Future<void> cacheProductsLocally(List<Product> products) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final listJson = products.map((p) => json.encode(p.toJson())).toList();
+      await prefs.setStringList(_keyProducts, listJson);
+    } catch (e) {
+      if (kDebugMode) print('Local cache products error: $e');
+    }
+  }
+
+  Future<List<Product>> getLocalProducts() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_keyProducts);
+      if (list != null && list.isNotEmpty) {
+        return list.map((str) => Product.fromJson(json.decode(str))).toList();
+      }
+    } catch (e) {
+      if (kDebugMode) print('Local get products error: $e');
+    }
+    return [];
+  }
+
+  /// Fetches products from the Firestore 'products' collection (with local admin cache fallback)
+  Future<List<Product>> fetchProducts() async {
+    try {
+      final firestore = _firestore;
+      if (firestore != null) {
+        final snapshot = await firestore.collection('products').get();
+        if (snapshot.docs.isNotEmpty) {
+          final products = snapshot.docs.map((doc) => Product.fromJson(doc.data())).toList();
+          products.sort((a, b) => a.id.compareTo(b.id));
+          await cacheProductsLocally(products);
+          return products;
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Firestore fetchProducts error: $e');
+      }
+    }
+
+    // Fallback: Read locally saved admin catalog products
+    return getLocalProducts();
+  }
+
+  /// Adds or updates a product in Firestore and local admin store
+  Future<bool> saveProduct(Product product) async {
+    bool firestoreOk = false;
+    try {
+      final firestore = _firestore;
+      if (firestore != null) {
+        final docRef = firestore.collection('products').doc('p_${product.id}');
+        final data = {
+          ...product.toMap(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        };
+        await docRef.set(data, SetOptions(merge: true));
+        firestoreOk = true;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Firestore saveProduct error: $e');
+      }
+    }
+
+    // Always keep local store updated
+    final local = await getLocalProducts();
+    final index = local.indexWhere((p) => p.id == product.id);
+    if (index != -1) {
+      local[index] = product;
+    } else {
+      local.insert(0, product);
+    }
+    await cacheProductsLocally(local);
+    return firestoreOk;
+  }
+
+  /// Deletes a product from Firestore and local admin store
+  Future<bool> deleteProduct(int productId) async {
+    bool firestoreOk = false;
+    try {
+      final firestore = _firestore;
+      if (firestore != null) {
+        await firestore.collection('products').doc('p_$productId').delete();
+        firestoreOk = true;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Firestore deleteProduct error: $e');
+      }
+    }
+
+    // Remove from local store
+    final local = await getLocalProducts();
+    local.removeWhere((p) => p.id == productId);
+    await cacheProductsLocally(local);
+    return firestoreOk;
+  }
+
+  /// Bulk seeds/uploads multiple products into Firestore and local store
+  Future<int> bulkSeedProducts(List<Product> products) async {
+    int count = 0;
+    try {
+      final firestore = _firestore;
+      if (firestore != null && products.isNotEmpty) {
+        final batch = firestore.batch();
+        for (final p in products) {
+          final docRef = firestore.collection('products').doc('p_${p.id}');
+          batch.set(
+            docRef,
+            {
+              ...p.toMap(),
+              'updatedAt': FieldValue.serverTimestamp(),
+            },
+            SetOptions(merge: true),
+          );
+        }
+        await batch.commit();
+        count = products.length;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Firestore bulkSeedProducts error: $e');
+      }
+    }
+
+    // Persist as current store inventory
+    await cacheProductsLocally(products);
+    return count > 0 ? count : products.length;
   }
 }

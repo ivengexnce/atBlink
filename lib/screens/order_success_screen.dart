@@ -29,9 +29,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_secondsLeft > 0) {
-        setState(() {
-          _secondsLeft--;
-        });
+        setState(() => _secondsLeft--);
       } else {
         _timer?.cancel();
       }
@@ -45,9 +43,17 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
   }
 
   String _formatTime(int totalSeconds) {
-    int minutes = totalSeconds ~/ 60;
-    int seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    final minutes = (totalSeconds ~/ 60).toString().padLeft(2, '0');
+    final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
+  void _goHome() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      (route) => false,
+    );
   }
 
   @override
@@ -64,13 +70,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary),
-          onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-              (route) => false,
-            );
-          },
+          onPressed: _goHome,
         ),
         title: const Text(
           'Live Delivery Tracking',
@@ -118,8 +118,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
               ),
               const SizedBox(height: 4),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   borderRadius: BorderRadius.circular(8),
@@ -140,8 +139,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
               // Countdown Delivery Timer Card
               Container(
                 width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFFFFFBEA), Color(0xFFFFF3CD)],
@@ -367,8 +365,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
                     ),
                     _buildStepRow(
                       title: 'Items Picked & Packed',
-                      subtitle:
-                          'Fresh dairy and grocery checked by store manager',
+                      subtitle: 'Fresh dairy and grocery checked by store manager',
                       isCompleted: true,
                       isLast: false,
                     ),
@@ -422,13 +419,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HomeScreen()),
-                    (route) => false,
-                  );
-                },
+                onPressed: _goHome,
                 child: const Text(
                   'Back to Home Store',
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
@@ -448,6 +439,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
     required bool isCompleted,
     required bool isLast,
   }) {
+    final statusColor = isCompleted ? AppColors.primaryGreen : Colors.grey.shade300;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -457,9 +449,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
               padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isCompleted
-                    ? AppColors.primaryGreen
-                    : Colors.grey.shade300,
+                color: statusColor,
               ),
               child: Icon(
                 isCompleted ? Icons.check : Icons.circle,
@@ -471,9 +461,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
               Container(
                 width: 2,
                 height: 38,
-                color: isCompleted
-                    ? AppColors.primaryGreen
-                    : Colors.grey.shade300,
+                color: statusColor,
               ),
           ],
         ),
@@ -487,9 +475,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 14,
-                  color: isCompleted
-                      ? AppColors.textPrimary
-                      : AppColors.textMuted,
+                  color: isCompleted ? AppColors.textPrimary : AppColors.textMuted,
                 ),
               ),
               const SizedBox(height: 2),

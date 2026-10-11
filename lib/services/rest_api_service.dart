@@ -11,7 +11,7 @@ class RestApiService {
 
   /// Fetch products from quick-commerce catalog with optional online enrichments
   Future<List<Product>> fetchProducts({String? category, String? searchQuery}) async {
-    final catalog = _getMockQuickCommerceProducts(category: category, searchQuery: searchQuery);
+    final catalog = getQuickCommerceCatalog(category: category, searchQuery: searchQuery);
 
     // If internet is reachable, attempt to fetch extra online products from DummyJSON
     try {
@@ -83,7 +83,7 @@ class RestApiService {
   }
 
   /// Comprehensive Quick Commerce catalog in Indian Rupees (₹)
-  List<Product> _getMockQuickCommerceProducts({String? category, String? searchQuery}) {
+  List<Product> getQuickCommerceCatalog({String? category, String? searchQuery}) {
     final allProducts = [
       // DAIRY
       Product(

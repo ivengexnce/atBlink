@@ -186,8 +186,10 @@ void main() {
   group('ProductProvider Filtering & Search Automation Tests', () {
     late ProductProvider productProvider;
 
-    setUp(() {
-      productProvider = ProductProvider();
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      productProvider = ProductProvider(autoLoad: false);
+      await productProvider.loadProductsForAdmin();
     });
 
     test('Categories are initialized with 8 distinct categories', () {
@@ -195,10 +197,20 @@ void main() {
       expect(productProvider.categories.first.name, equals('All'));
     });
 
-    test('Search query filter matches title or brand', () async {
-      // Wait for mock fallback / products to load
-      await productProvider.loadProducts();
+    test('Admin Hub loads all 25+ existing products and supports recategorization', () async {
+      expect(productProvider.allProducts.length, greaterThanOrEqualTo(25));
+      final firstProduct = productProvider.allProducts.first;
+      final originalCat = firstProduct.category;
 
+      await productProvider.recategorizeProduct(firstProduct.id, 'Groceries');
+      final updated = productProvider.allProducts.firstWhere((p) => p.id == firstProduct.id);
+      expect(updated.category, equals('Groceries'));
+
+      // Revert back
+      await productProvider.recategorizeProduct(firstProduct.id, originalCat);
+    });
+
+    test('Search query filter matches title or brand', () async {
       productProvider.setSearchQuery('Milk');
       for (final p in productProvider.products) {
         final matches = p.title.toLowerCase().contains('milk') ||
@@ -209,16 +221,12 @@ void main() {
     });
 
     test('Flash deals filter returns only discounted items (>= 10%)', () async {
-      await productProvider.loadProducts();
-
       for (final deal in productProvider.flashDeals) {
         expect(deal.discountPercentage, greaterThanOrEqualTo(10.0));
       }
     });
 
     test('selectCategory filters instantly and resetCategory resets to All', () async {
-      await productProvider.loadProducts();
-
       // Test select category
       productProvider.selectCategory('Snacks');
       expect(productProvider.selectedCategory, equals('Snacks'));

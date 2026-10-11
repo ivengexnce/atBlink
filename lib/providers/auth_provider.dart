@@ -12,30 +12,40 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  /// Google OAuth Sign-In
-  Future<bool> signInWithGoogle(ProfileProvider profileProvider) async {
-    _isLoading = true;
-    _errorMessage = null;
+  void _setLoading(bool value) {
+    _isLoading = value;
     notifyListeners();
+  }
 
+  Future<bool> _executeAuth(
+    ProfileProvider profileProvider,
+    Future<UserProfile?> Function() authAction, {
+    String? cancelMessage,
+  }) async {
+    _errorMessage = null;
+    _setLoading(true);
     try {
-      final UserProfile? userProfile = await _authService.signInWithGoogle();
+      final userProfile = await authAction();
       if (userProfile != null) {
         await profileProvider.setProfile(userProfile);
-        _isLoading = false;
-        notifyListeners();
+        _setLoading(false);
         return true;
-      } else {
-        _errorMessage = 'Google Sign-In was cancelled or failed.';
       }
+      if (cancelMessage != null) _errorMessage = cancelMessage;
     } catch (e) {
-      _errorMessage = 'Google Sign-In Error: $e';
+      _errorMessage = e.toString();
     }
-
-    _isLoading = false;
-    notifyListeners();
+    _setLoading(false);
     return false;
   }
+
+  /// Google OAuth Sign-In
+  Future<bool> signInWithGoogle(ProfileProvider profileProvider) =>
+      _executeAuth(
+        profileProvider,
+        _authService.signInWithGoogle,
+        cancelMessage: 'Google Sign-In was cancelled or failed.',
+      );
 
   /// Register with Email & Password
   Future<bool> registerWithEmail({
@@ -43,75 +53,29 @@ class AuthProvider extends ChangeNotifier {
     required String password,
     required String name,
     required ProfileProvider profileProvider,
-  }) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      final userProfile = await _authService.registerWithEmail(email, password, name);
-      if (userProfile != null) {
-        await profileProvider.setProfile(userProfile);
-        _isLoading = false;
-        notifyListeners();
-        return true;
-      }
-    } catch (e) {
-      _errorMessage = 'Registration error: $e';
-    }
-
-    _isLoading = false;
-    notifyListeners();
-    return false;
-  }
+  }) =>
+      _executeAuth(
+        profileProvider,
+        () => _authService.registerWithEmail(email, password, name),
+      );
 
   /// Sign In with Email & Password
   Future<bool> signInWithEmail({
     required String email,
     required String password,
     required ProfileProvider profileProvider,
-  }) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      final userProfile = await _authService.signInWithEmail(email, password);
-      if (userProfile != null) {
-        await profileProvider.setProfile(userProfile);
-        _isLoading = false;
-        notifyListeners();
-        return true;
-      }
-    } catch (e) {
-      _errorMessage = 'Sign In error: $e';
-    }
-
-    _isLoading = false;
-    notifyListeners();
-    return false;
-  }
+  }) =>
+      _executeAuth(
+        profileProvider,
+        () => _authService.signInWithEmail(email, password),
+      );
 
   /// Guest Sign In
-  Future<bool> signInAsGuest(ProfileProvider profileProvider) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      final userProfile = await _authService.signInAsGuest();
-      await profileProvider.setProfile(userProfile);
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _errorMessage = 'Guest Sign-In error: $e';
-    }
-
-    _isLoading = false;
-    notifyListeners();
-    return false;
-  }
+  Future<bool> signInAsGuest(ProfileProvider profileProvider) =>
+      _executeAuth(
+        profileProvider,
+        () async => _authService.signInAsGuest(),
+      );
 
   /// Sign Out
   Future<void> signOut(ProfileProvider profileProvider) async {

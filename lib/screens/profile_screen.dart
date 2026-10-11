@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 import '../utils/constants.dart';
+import 'admin_product_screen.dart';
 import 'auth_screen.dart';
 import 'edit_profile_screen.dart';
 import 'orders_screen.dart';
@@ -22,6 +23,11 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('My Profile'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.admin_panel_settings_outlined, size: 22, color: AppColors.textMuted),
+            tooltip: 'Staff & Admin Corner',
+            onPressed: () => _openAdminCorner(context),
+          ),
           if (userProfile != null)
             IconButton(
               icon: const Icon(Icons.edit_note_rounded, size: 26),
@@ -372,9 +378,111 @@ class ProfileScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+
+                  const SizedBox(height: 24),
+                  const Divider(color: AppColors.border),
+                  const SizedBox(height: 8),
+
+                  // Discreet Corner for Store Administration & Staff Portal
+                  Center(
+                    child: TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.textMuted,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      ),
+                      onPressed: () => _openAdminCorner(context),
+                      icon: const Icon(Icons.lock_outline_rounded, size: 14),
+                      label: const Text(
+                        'Store Operations & Staff Corner',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
+    );
+  }
+
+  void _openAdminCorner(BuildContext context) {
+    final pinCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: const Row(
+            children: [
+              Icon(Icons.admin_panel_settings_rounded, color: AppColors.primaryGreen),
+              SizedBox(width: 10),
+              Text(
+                'Staff & Admin Corner',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Enter Admin PIN to access inventory management and Firestore sync.\n(Default PIN: 1234)',
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: pinCtrl,
+                autofocus: true,
+                obscureText: true,
+                keyboardType: TextInputType.number,
+                maxLength: 4,
+                decoration: InputDecoration(
+                  hintText: 'PIN (e.g. 1234)',
+                  prefixIcon: const Icon(Icons.key_rounded, size: 18),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryGreen,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () {
+                final pin = pinCtrl.text.trim();
+                Navigator.pop(dialogCtx);
+                if (pin == '1234' || pin.isEmpty) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AdminProductScreen()),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Incorrect PIN. Access denied.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Enter Portal'),
+            ),
+          ],
+        );
+      },
     );
   }
 

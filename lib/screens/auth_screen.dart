@@ -58,7 +58,6 @@ class _AuthScreenState extends State<AuthScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Top Header Banner with Gradient
               Container(
                 decoration: const BoxDecoration(
                   gradient: AppColors.yellowGradient,
@@ -188,8 +187,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       onPressed: authProvider.isLoading
                           ? null
                           : () async {
-                              final success = await authProvider
-                                  .signInWithGoogle(profileProvider);
+                              final success = await authProvider.signInWithGoogle(profileProvider);
                               if (success && mounted) {
                                 _navigateToHome('⚡ Signed in via Firebase Google OAuth!');
                               }
@@ -249,7 +247,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 prefixIcon: Icon(Icons.person_outline_rounded),
                               ),
                               validator: (val) {
-                                if (!_isLogin && (val == null || val.isEmpty)) {
+                                if (!_isLogin && (val == null || val.trim().isEmpty)) {
                                   return 'Please enter your name';
                                 }
                                 return null;
@@ -302,21 +300,20 @@ class _AuthScreenState extends State<AuthScreen> {
                                 ? null
                                 : () async {
                                     if (_formKey.currentState!.validate()) {
-                                      bool success = false;
-                                      if (_isLogin) {
-                                        success = await authProvider.signInWithEmail(
-                                          email: _emailController.text.trim(),
-                                          password: _passwordController.text.trim(),
-                                          profileProvider: profileProvider,
-                                        );
-                                      } else {
-                                        success = await authProvider.registerWithEmail(
-                                          email: _emailController.text.trim(),
-                                          password: _passwordController.text.trim(),
-                                          name: _nameController.text.trim(),
-                                          profileProvider: profileProvider,
-                                        );
-                                      }
+                                      final email = _emailController.text.trim();
+                                      final pwd = _passwordController.text.trim();
+                                      final success = _isLogin
+                                          ? await authProvider.signInWithEmail(
+                                              email: email,
+                                              password: pwd,
+                                              profileProvider: profileProvider,
+                                            )
+                                          : await authProvider.registerWithEmail(
+                                              email: email,
+                                              password: pwd,
+                                              name: _nameController.text.trim(),
+                                              profileProvider: profileProvider,
+                                            );
                                       if (success && mounted) {
                                         _navigateToHome(_isLogin
                                             ? '⚡ Welcome back, ${profileProvider.userProfile?.name ?? "Shopper"}!'
@@ -347,11 +344,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
                     const SizedBox(height: 14),
                     TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _isLogin = !_isLogin;
-                        });
-                      },
+                      onPressed: () => setState(() => _isLogin = !_isLogin),
                       child: Text(
                         _isLogin
                             ? 'Don\'t have an account? Sign Up'
@@ -375,8 +368,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       onPressed: authProvider.isLoading
                           ? null
                           : () async {
-                              final success =
-                                  await authProvider.signInAsGuest(profileProvider);
+                              final success = await authProvider.signInAsGuest(profileProvider);
                               if (success && mounted) {
                                 _navigateToHome('⚡ Signed in as Guest (Anonymous Firebase Auth)');
                               }

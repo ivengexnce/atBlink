@@ -7,7 +7,7 @@ class CategoryItem {
   final IconData iconData;
   final Color backgroundColor;
 
-  CategoryItem({
+  const CategoryItem({
     required this.id,
     required this.name,
     this.iconUrl = '',

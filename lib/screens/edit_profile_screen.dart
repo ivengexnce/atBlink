@@ -32,13 +32,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final profile = context.read<ProfileProvider>().userProfile;
     _nameController = TextEditingController(text: profile?.name ?? '');
     _phoneController = TextEditingController(
-        text: profile?.phone.isNotEmpty == true
-            ? profile!.phone
-            : '+91 98765 43210');
+      text: profile?.phone.isNotEmpty == true ? profile!.phone : '+91 98765 43210',
+    );
     _addressController = TextEditingController(
-        text: profile?.address ?? 'Flat 402, Green Park Heights, Cyber City');
+      text: profile?.address ?? 'Flat 402, Green Park Heights, Cyber City',
+    );
     _bioController = TextEditingController(
-        text: profile?.bio ?? 'Shopping for fresh groceries on atBlink ⚡');
+      text: profile?.bio ?? 'Shopping for fresh groceries on atBlink ⚡',
+    );
   }
 
   @override
@@ -57,13 +58,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (pickedFile != null) {
         if (kIsWeb) {
           final bytes = await pickedFile.readAsBytes();
-          setState(() {
-            _selectedImageBytes = bytes;
-          });
+          setState(() => _selectedImageBytes = bytes);
         } else {
-          setState(() {
-            _selectedImageFile = File(pickedFile.path);
-          });
+          setState(() => _selectedImageFile = File(pickedFile.path));
         }
       }
     } catch (e) {
@@ -75,16 +72,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  ImageProvider? _getAvatarImage(String? photoUrl) {
+    if (_selectedImageBytes != null) return MemoryImage(_selectedImageBytes!);
+    if (_selectedImageFile != null) return FileImage(_selectedImageFile!);
+    if (photoUrl != null && photoUrl.isNotEmpty) return NetworkImage(photoUrl);
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileProvider = context.watch<ProfileProvider>();
     final userProfile = profileProvider.userProfile;
+    final avatarImage = _getAvatarImage(userProfile?.photoUrl);
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Edit Profile'),
-      ),
+      appBar: AppBar(title: const Text('Edit Profile')),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(20),
@@ -101,22 +104,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                            color: AppColors.primaryGreen, width: 2.5),
+                        border: Border.all(color: AppColors.primaryGreen, width: 2.5),
                       ),
                       child: CircleAvatar(
                         radius: 50,
                         backgroundColor: AppColors.primaryYellow,
-                        backgroundImage: _selectedImageBytes != null
-                            ? MemoryImage(_selectedImageBytes!)
-                            : (_selectedImageFile != null
-                                ? FileImage(_selectedImageFile!) as ImageProvider
-                                : (userProfile?.photoUrl.isNotEmpty == true
-                                    ? NetworkImage(userProfile!.photoUrl)
-                                    : null)),
-                        child: (_selectedImageBytes == null &&
-                                _selectedImageFile == null &&
-                                (userProfile?.photoUrl.isEmpty ?? true))
+                        backgroundImage: avatarImage,
+                        child: avatarImage == null
                             ? const Icon(
                                 Icons.person_rounded,
                                 size: 55,
@@ -138,8 +132,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             border: Border.all(color: Colors.white, width: 2),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primaryGreen
-                                    .withValues(alpha: 0.35),
+                                color: AppColors.primaryGreen.withValues(alpha: 0.35),
                                 blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),
@@ -181,12 +174,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   labelText: 'Full Name',
                   prefixIcon: Icon(Icons.person_outline_rounded),
                 ),
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return 'Please enter your name';
-                  }
-                  return null;
-                },
+                validator: (val) =>
+                    (val == null || val.trim().isEmpty) ? 'Please enter your name' : null,
               ),
 
               const SizedBox(height: 16),
@@ -199,12 +188,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   labelText: 'Phone Number',
                   prefixIcon: Icon(Icons.phone_outlined),
                 ),
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return 'Please enter your phone number';
-                  }
-                  return null;
-                },
+                validator: (val) =>
+                    (val == null || val.trim().isEmpty) ? 'Please enter your phone number' : null,
               ),
 
               const SizedBox(height: 16),
@@ -218,12 +203,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   prefixIcon: Icon(Icons.location_on_outlined),
                   alignLabelWithHint: true,
                 ),
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return 'Please provide a valid delivery address';
-                  }
-                  return null;
-                },
+                validator: (val) =>
+                    (val == null || val.trim().isEmpty) ? 'Please provide a valid delivery address' : null,
               ),
 
               const SizedBox(height: 16),
@@ -253,10 +234,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ? null
                     : () async {
                         if (_formKey.currentState!.validate()) {
-                          final scaffoldMessenger =
-                              ScaffoldMessenger.of(context);
-                          final navigator = Navigator.of(context);
-
                           final success = await profileProvider.updateProfile(
                             name: _nameController.text.trim(),
                             phone: _phoneController.text.trim(),
@@ -266,14 +243,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             newImageBytes: _selectedImageBytes,
                           );
 
-                          if (success && mounted) {
-                            scaffoldMessenger.showSnackBar(
+                          if (success && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Profile updated successfully!'),
                                 backgroundColor: AppColors.primaryGreen,
                               ),
                             );
-                            navigator.pop();
+                            Navigator.of(context).pop();
                           }
                         }
                       },

@@ -21,8 +21,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final profile = context.read<ProfileProvider>().userProfile;
-      final userId = profile?.id ?? 'guest';
-      context.read<OrderProvider>().fetchUserOrders(userId);
+      context.read<OrderProvider>().fetchUserOrders(profile?.id ?? 'guest');
     });
   }
 
@@ -48,9 +47,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       ),
       body: RefreshIndicator(
         color: AppColors.primaryGreen,
-        onRefresh: () async {
-          await orderProvider.fetchUserOrders(userId);
-        },
+        onRefresh: () => orderProvider.fetchUserOrders(userId),
         child: orderProvider.isLoading && orderProvider.orders.isEmpty
             ? const Center(
                 child: CircularProgressIndicator(color: AppColors.primaryGreen),
@@ -63,10 +60,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       parent: BouncingScrollPhysics(),
                     ),
                     itemCount: orderProvider.orders.length,
-                    itemBuilder: (context, index) {
-                      final order = orderProvider.orders[index];
-                      return _buildOrderCard(order);
-                    },
+                    itemBuilder: (context, index) => _buildOrderCard(orderProvider.orders[index]),
                   ),
       ),
     );
@@ -81,7 +75,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.mintGreen,
                 shape: BoxShape.circle,
               ),
@@ -135,6 +129,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   Widget _buildOrderCard(OrderModel order) {
+    final d = order.orderedAt;
+    final dateStr = '${d.day}/${d.month}/${d.year} at ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -175,7 +172,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${order.orderedAt.day}/${order.orderedAt.month}/${order.orderedAt.year} at ${order.orderedAt.hour.toString().padLeft(2, '0')}:${order.orderedAt.minute.toString().padLeft(2, '0')}',
+                      dateStr,
                       style: const TextStyle(
                         fontSize: 11,
                         color: AppColors.textMuted,
@@ -254,7 +251,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                               fit: BoxFit.contain,
                               cacheWidth: 100,
                               cacheHeight: 100,
-                              errorBuilder: (ctx, err, stack) =>
+                              errorBuilder: (context, error, stackTrace) =>
                                   const Icon(Icons.shopping_bag_outlined, size: 20, color: AppColors.textMuted),
                             ),
                           ),

@@ -26,9 +26,13 @@ class OrderModel {
     DateTime? orderedAt,
   }) : orderedAt = orderedAt ?? DateTime.now();
 
+  static int _orderCounter = 0;
+
   static String generateOrderId() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    return 'ATB-${timestamp.toRadixString(36).toUpperCase()}';
+    _orderCounter = (_orderCounter + 1) % 1000;
+    final counterSalt = _orderCounter.toRadixString(36).toUpperCase().padLeft(2, '0');
+    return 'ATB-${timestamp.toRadixString(36).toUpperCase()}$counterSalt';
   }
 
   Map<String, dynamic> toMap() {

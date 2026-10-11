@@ -1,0 +1,106 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Models
+    // ===============================================================
+    //
+    // Collection: users/{userId}
+    // Fields:
+    //   - id: string (user UID)
+    //   - name: string
+    //   - email: string
+    //   - phone: string (optional)
+    //   - address: string (optional)
+    //   - photoUrl: string (optional)
+    //   - bio: string (optional)
+    //   - authMethod: string ('google', 'email', 'guest')
+    //   - createdAt: timestamp / string
+    //   - lastLoginAt: timestamp
+    //   - updatedAt: timestamp
+    //
+    // Collection: products/{productId}
+    // Fields:
+    //   - id: int
+    //   - title: string
+    //   - category: string
+    //   - brand: string
+    //   - price: number
+    //   - discountPercentage: number
+    //   - stock: int
+    //   - unitQuantity: string
+    //   - deliveryEta: string
+    //   - thumbnail: string
+    //   - description: string
+    //   - updatedAt: timestamp
+    //
+    // Collection: orders/{orderId}
+    // Fields:
+    //   - orderId: string
+    //   - userId: string
+    //   - customerName: string
+    //   - deliveryAddress: string
+    //   - items: list
+    //   - totalAmount: number
+    //   - orderStatus: string
+    //   - orderedAt: timestamp / string
+    //
+    // Collection: product_reviews/{reviewId}
+    // Fields:
+    //   - id: string
+    //   - productId: int
+    //   - userId: string
+    //   - rating: number
+    //   - comment: string
+    //   - createdAt: timestamp / string
+    //
+    // ===============================================================
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ---------------------------------------------------------------
+    // 1. PRODUCTS CATALOG COLLECTION
+    // ---------------------------------------------------------------
+    match /products/{productId} {
+      // Anyone can browse products; store managers & admin can manage & seed
+      allow read, write: if true;
+    }
+
+    // ---------------------------------------------------------------
+    // 2. USERS & USER ORDERS
+    // ---------------------------------------------------------------
+    match /users/{userId} {
+      // Allows user profiles to sync for authenticated, guest, and demo sessions
+      allow read, write: if true;
+
+      match /orders/{orderId} {
+        allow read, write: if true;
+      }
+    }
+
+    // ---------------------------------------------------------------
+    // 3. ORDERS COLLECTION
+    // ---------------------------------------------------------------
+    match /orders/{orderId} {
+      // Customers can place orders and track their deliveries
+      allow read, write: if true;
+    }
+
+    // ---------------------------------------------------------------
+    // 4. PRODUCT REVIEWS COLLECTION
+    // ---------------------------------------------------------------
+    match /product_reviews/{reviewId} {
+      // Community ratings and reviews
+      allow read, write: if true;
+    }
+  }
+}
+

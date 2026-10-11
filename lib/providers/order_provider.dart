@@ -46,4 +46,14 @@ class OrderProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Update an order status locally and in Firestore
+  Future<void> updateOrderStatus(String orderId, String userId, String newStatus) async {
+    final index = _orders.indexWhere((o) => o.orderId == orderId);
+    if (index != -1) {
+      _orders[index] = _orders[index].copyWith(status: newStatus);
+      notifyListeners();
+    }
+    await _firestoreService.updateOrderStatus(orderId, userId, newStatus);
+  }
 }

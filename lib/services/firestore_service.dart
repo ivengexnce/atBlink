@@ -105,6 +105,47 @@ class FirestoreService {
     return firestoreSuccess;
   }
 
+  /// Updates order status in Firestore and locally
+  Future<void> updateOrderStatus(String orderId, String userId, String newStatus) async {
+    try {
+      final firestore = _firestore;
+      if (firestore != null) {
+        await firestore.collection('orders').doc(orderId).update({
+          'status': newStatus,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+        if (userId.isNotEmpty) {
+          await firestore
+              .collection('users')
+              .doc(userId)
+              .collection('orders')
+              .doc(orderId)
+              .update({'status': newStatus});
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) print('Firestore updateOrderStatus error: $e');
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final key = 'cached_orders_$userId';
+      final list = prefs.getStringList(key);
+      if (list != null) {
+        final updated = list.map((str) {
+          final order = OrderModel.fromJson(str);
+          if (order.orderId == orderId) {
+            return order.copyWith(status: newStatus).toJson();
+          }
+          return str;
+        }).toList();
+        await prefs.setStringList(key, updated);
+      }
+    } catch (e) {
+      if (kDebugMode) print('Local update order status error: $e');
+    }
+  }
+
   /// Fetches orders placed by the user from Firestore (with local cache fallback)
   Future<List<OrderModel>> fetchUserOrders(String userId) async {
     try {

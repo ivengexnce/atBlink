@@ -72,6 +72,32 @@ class OrderModel {
     );
   }
 
+  OrderModel copyWith({
+    String? orderId,
+    String? userId,
+    List<CartItem>? items,
+    double? subtotal,
+    double? deliveryFee,
+    double? handlingFee,
+    double? grandTotal,
+    String? deliveryAddress,
+    String? status,
+    DateTime? orderedAt,
+  }) {
+    return OrderModel(
+      orderId: orderId ?? this.orderId,
+      userId: userId ?? this.userId,
+      items: items ?? this.items,
+      subtotal: subtotal ?? this.subtotal,
+      deliveryFee: deliveryFee ?? this.deliveryFee,
+      handlingFee: handlingFee ?? this.handlingFee,
+      grandTotal: grandTotal ?? this.grandTotal,
+      deliveryAddress: deliveryAddress ?? this.deliveryAddress,
+      status: status ?? this.status,
+      orderedAt: orderedAt ?? this.orderedAt,
+    );
+  }
+
   String toJson() => json.encode(toMap());
 
   factory OrderModel.fromJson(String source) =>
